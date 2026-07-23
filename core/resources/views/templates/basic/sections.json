@@ -1,0 +1,258 @@
+{
+    "breadcrumb": {
+        "builder": true,
+        "no_selection": true,
+        "name": "Breadcrumb",
+        "content": {
+            "images": {
+                "image": {
+                    "size": "1920x1186"
+                }
+            }
+        }
+    },
+    "tour_plan_breadcrumb": {
+        "builder": true,
+        "no_selection": true,
+        "name": "Tour Plan Breadcrumb",
+        "content": {
+            "images": {
+                "image": {
+                    "size": "1920x1131"
+                }
+            }
+        }
+    },
+    "banner": {
+        "builder": true,
+        "no_selection": true,
+        "name": "Banner Section",
+        "content": {
+            "images": {
+                "image": {
+                    "size": "1920x1280"
+                }
+            },
+            "heading": "text",
+            "subheading": "text"
+        }
+    },
+    "tour_plans": {
+        "builder": true,
+        "name": "Tour Plans",
+        "content": {
+            "images": {
+                "background_image": {
+                    "size": "1920x1280"
+                }
+            },
+            "heading": "text",
+            "subheading": "text"
+        }
+    },
+    "about": {
+        "builder": true,
+        "name": "About Us",
+        "content": {
+            "images": {
+                "image": {
+                    "size": "606x565"
+                }
+            },
+            "heading": "text",
+            "subheading": "text"
+        },
+        "element": {
+            "icon": "icon",
+            "title": "text",
+            "content": "textarea",
+            "modal": true
+        }
+    },
+    "counter": {
+        "builder": true,
+        "no_selection": true,
+        "name": "Counter Section",
+        "element": {
+            "title": "text",
+            "counter_digit": "text",
+            "modal": true
+        }
+    },
+    "how_work": {
+        "builder": true,
+        "name": "How It Works",
+        "content": {
+            "heading": "text"
+        },
+        "element": {
+            "title": "text",
+            "content": "textarea",
+            "icon": "icon",
+            "modal": true
+        }
+    },
+    "testimonial": {
+        "builder": true,
+        "name": "Testimonial",
+        "content": {
+            "images": {
+                "image": {
+                    "size": "1920x660"
+                }
+            },
+            "heading": "text",
+            "subheading": "text"
+        },
+        "element": {
+            "name": "text",
+            "review": "textarea",
+            "rating": "text",
+            "modal": true
+        }
+    },
+    "policy_pages": {
+        "builder": true,
+        "no_selection": true,
+        "name": "Policy Pages",
+        "hide_builder": true,
+        "element": {
+            "title": "text",
+            "slug": "title",
+            "details": "textarea-nic",
+            "modal": false,
+            "seo": true
+        }
+    },
+    "blog": {
+        "builder": true,
+        "name": "Blog Section",
+        "content": {
+            "heading": "text"
+        },
+        "element": {
+            "images": {
+                "image": {
+                    "size": "855x570",
+                    "thumb": "430x285"
+                }
+            },
+            "title": "text",
+            "slug": "title",
+            "description": "textarea-nic",
+            "modal": false,
+            "seo": true
+        }
+    },
+    "subscribe": {
+        "builder": true,
+        "name": "Subscribe Section",
+        "content": {
+            "images": {
+                "image": {
+                    "size": "1920x987"
+                }
+            },
+            "heading": "text"
+        }
+    },
+    "social_icon": {
+        "builder": true,
+        "no_selection": true,
+        "name": "Social Icons",
+        "element": {
+            "title": "text",
+            "social_icon": "icon",
+            "url": "text",
+            "modal": true
+        }
+    },
+    "contact_us": {
+        "builder": true,
+        "no_selection": true,
+        "name": "Contact Us",
+        "content": {
+            "images": {
+                "image": {
+                    "size": "992x662"
+                }
+            },
+            "title": "text",
+            "short_details": "text",
+            "email_address": "text",
+            "contact_details": "text",
+            "contact_number": "text",
+            "latitude": "text",
+            "longitude": "text"
+        }
+    },
+    "footer": {
+        "builder": true,
+        "no_selection": true,
+        "name": "Footer Section",
+        "content": {
+            "images": {
+                "background_image": {
+                    "size": "1920x960"
+                },
+                "payment_image": {
+                    "size": "385x51"
+                }
+            },
+            "heading": "text",
+            "content": "textarea",
+            "button_name": "text",
+            "button_link": "text"
+        }
+    },
+    "auth": {
+        "builder": true,
+        "no_selection": true,
+        "name": "Auth Page",
+        "content": {
+            "images": {
+                "image": {
+                    "size": "1920x1080"
+                }
+            }
+        }
+    },
+    "banned": {
+        "builder": true,
+        "no_selection": true,
+        "name": "Banned Page",
+        "content": {
+            "images": {
+                "image": {
+                    "size": "700x400"
+                }
+            },
+            "heading": "text"
+        }
+    },
+    "day_trips": {
+        "builder": true,
+        "name": "Day Trips",
+        "content": {
+            "images": {
+                "background_image": {
+                    "size": "1920x1282"
+                }
+            },
+            "heading": "text",
+            "subheading": "text"
+        }
+    },
+    "day_trip_breadcrumb": {
+        "builder": true,
+        "no_selection": true,
+        "name": "Day Trip Breadcrumb",
+        "content": {
+            "images": {
+                "image": {
+                    "size": "1920x1131"
+                }
+            }
+        }
+    }
+}
