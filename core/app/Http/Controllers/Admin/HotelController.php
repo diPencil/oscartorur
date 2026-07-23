@@ -167,4 +167,22 @@ class HotelController extends Controller
         $notify[] = ['success', 'Hotel permanently deleted successfully'];
         return back()->withNotify($notify);
     }
+
+    public function syncAmenities(Request $request, $id)
+    {
+        $hotel = Hotel::findOrFail($id);
+        $request->validate([
+            'amenities' => 'nullable|array',
+            'amenities.*' => 'exists:amenities,id',
+        ]);
+        
+        if ($request->has('amenities')) {
+            $hotel->amenities()->sync($request->amenities);
+        } else {
+            $hotel->amenities()->sync([]);
+        }
+
+        $notify[] = ['success', 'Amenities updated successfully'];
+        return back()->withNotify($notify);
+    }
 }

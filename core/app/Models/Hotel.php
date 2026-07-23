@@ -11,15 +11,7 @@ class Hotel extends Model
 {
     use HasFactory;
 
-    public function scopeActive($query)
-    {
-        return $query->where('status', 'active');
-    }
-
-    public function scopeInactive($query)
-    {
-        return $query->where('status', 'inactive');
-    }
+    // Inherits scopes from GlobalStatus trait
 
     public function getNameAttribute($value)
     {
