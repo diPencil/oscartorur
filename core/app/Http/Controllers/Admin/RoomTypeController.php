@@ -29,7 +29,7 @@ class RoomTypeController extends Controller
     public function create($hotel_id = null)
     {
         $pageTitle = 'Add New Room Type';
-        $hotels    = Hotel::active()->orderBy('name')->get();
+        $hotels    = Hotel::orderBy('name')->get();
         $bedTypes  = BedType::active()->orderBy('name')->get();
         $amenities = Amenity::active()->where('type', 'room')->orderBy('name')->get();
         return view('admin.room_type.form', compact('pageTitle', 'hotels', 'bedTypes', 'amenities', 'hotel_id'));
@@ -39,7 +39,7 @@ class RoomTypeController extends Controller
     {
         $roomType  = RoomType::with(['beds', 'amenities', 'images'])->findOrFail($id);
         $pageTitle = 'Edit Room Type: ' . $roomType->name;
-        $hotels    = Hotel::active()->orderBy('name')->get();
+        $hotels    = Hotel::orderBy('name')->get();
         $bedTypes  = BedType::active()->orderBy('name')->get();
         $amenities = Amenity::active()->where('type', 'room')->orderBy('name')->get();
         return view('admin.room_type.form', compact('pageTitle', 'roomType', 'hotels', 'bedTypes', 'amenities'));
