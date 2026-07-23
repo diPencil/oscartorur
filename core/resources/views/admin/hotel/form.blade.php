@@ -32,7 +32,18 @@
                                 </div>
                             </div>
                             <div class="col-md-6 form-group">
-                                <label>@lang('Star Rating')</label>
+                                <label>@lang('Property Type') <span class="text-danger">*</span></label>
+                                <select name="property_type" class="form-control" required>
+                                    <option value="">@lang('Select Property Type')</option>
+                                    <option value="Hotel" @selected(old('property_type', @$hotel->property_type) == 'Hotel')>@lang('Hotel')</option>
+                                    <option value="Resort" @selected(old('property_type', @$hotel->property_type) == 'Resort')>@lang('Resort')</option>
+                                    <option value="Apartment" @selected(old('property_type', @$hotel->property_type) == 'Apartment')>@lang('Apartment')</option>
+                                    <option value="Villa" @selected(old('property_type', @$hotel->property_type) == 'Villa')>@lang('Villa')</option>
+                                    <option value="Guest House" @selected(old('property_type', @$hotel->property_type) == 'Guest House')>@lang('Guest House')</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>@lang('Star Rating') <span class="text-danger">*</span></label>
                                 <select name="star_rating" class="form-control" required>
                                     <option value="">@lang('Select Rating')</option>
                                     @for ($i = 1; $i <= 5; $i++)
@@ -41,8 +52,17 @@
                                 </select>
                             </div>
                             <div class="col-md-6 form-group">
-                                <label>@lang('Location')</label>
-                                <select name="location_id" class="form-control" required>
+                                <label>@lang('Country') <span class="text-danger">*</span></label>
+                                <select name="country_id" class="form-control" required id="country">
+                                    <option value="">@lang('Select Country')</option>
+                                    @foreach ($countries as $country)
+                                        <option value="{{ $country->id }}" @selected(old('country_id', @$hotel->country_id) == $country->id)>{{ __($country->name) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>@lang('Location') <span class="text-danger">*</span></label>
+                                <select name="location_id" class="form-control" required id="location">
                                     <option value="">@lang('Select Location')</option>
                                     @foreach ($locations as $location)
                                         <option value="{{ $location->id }}" @selected(old('location_id', @$hotel->location_id) == $location->id)>{{ __($location->name) }}</option>
