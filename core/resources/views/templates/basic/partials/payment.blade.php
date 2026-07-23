@@ -129,7 +129,7 @@
 
                 var userData = $(this).data('info');
                 var html = '';
-                if (userData) {
+                if (userData && Object.keys(userData).length > 0) {
                     userData.forEach(element => {
                         if (element.type != 'file') {
                             html += `
@@ -145,6 +145,8 @@
                             </li>`;
                         }
                     });
+                } else {
+                    html = '<li class="list-group-item text-center">@lang("No payment details were provided.")</li>';
                 }
 
                 modal.find('.userData').html(html);
