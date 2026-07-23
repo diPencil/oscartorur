@@ -112,7 +112,7 @@ class RoomTypeController extends Controller
             $bedsData = [];
             foreach ($request->beds as $key => $bedId) {
                 $count = $request->bed_counts[$key] ?? 1;
-                $bedsData[$bedId] = ['count' => $count];
+                $bedsData[$bedId] = ['quantity' => $count];
             }
             $roomType->beds()->sync($bedsData);
         } else {

@@ -82,7 +82,7 @@
                                                             <option value="{{ $bt->id }}" @selected($bt->id == $bed->id)>{{ __($bt->name) }}</option>
                                                         @endforeach
                                                     </select>
-                                                    <input type="number" name="bed_counts[]" class="form-control" placeholder="Count" value="{{ $bed->pivot->count }}" min="1" required>
+                                                    <input type="number" name="bed_counts[]" class="form-control" placeholder="Count" value="{{ $bed->pivot->quantity }}" min="1" required>
                                                     <button type="button" class="btn btn--danger remove-bed"><i class="las la-times"></i></button>
                                                 </div>
                                             </div>
