@@ -22,9 +22,9 @@
                                 <li><a class="{{ menuActive('user.seminar.log') }}" href="{{ route('user.seminar.log') }}">@lang('Day Trip Bookings')</a></li>
                             </ul>
                         </li>
-                        <li class="menu_has_children"><a class="{{ menuActive(['hotel.search', 'user.hotel.booking']) }}" href="javascript:void(0)">@lang('Hotels')</a>
+                        <li class="menu_has_children"><a class="{{ menuActive(['hotels', 'hotel.search', 'user.hotel.booking']) }}" href="javascript:void(0)">@lang('Hotels')</a>
                             <ul class="sub-menu">
-                                <li><a class="{{ menuActive('hotel.search') }}" href="{{ route('hotel.search') }}">@lang('Search')</a></li>
+                                <li><a class="{{ menuActive(['hotels', 'hotel.search']) }}" href="{{ route('hotels') }}">@lang('Search')</a></li>
                                 <li><a class="{{ menuActive('user.hotel.booking') }}" href="{{ route('user.hotel.booking') }}">@lang('My Bookings')</a></li>
                             </ul>
                         </li>
