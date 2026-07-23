@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 
 class Hotel extends Model
 {
-    use HasFactory;
+    use HasFactory, GlobalStatus;
 
     // Inherits scopes from GlobalStatus trait
 
