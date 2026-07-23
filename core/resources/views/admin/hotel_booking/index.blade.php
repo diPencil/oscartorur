@@ -33,7 +33,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <span class="fw-bold">{{ $booking->hotel->name }}</span>
+                                        <span class="fw-bold">{{ $booking->hotel?->name ?? 'Deleted Hotel' }}</span>
                                     </td>
                                     <td>
                                         {{ showDateTime($booking->check_in, 'd M, Y') }} <br>
