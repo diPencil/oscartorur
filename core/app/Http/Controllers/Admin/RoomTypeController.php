@@ -108,8 +108,8 @@ class RoomTypeController extends Controller
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
                 try {
-                    $path = getFilePath('room');
-                    $size = getFileSize('room');
+                    $path = getFilePath('roomTypeImage');
+                    $size = getFileSize('roomTypeImage');
                     $filename = fileUploader($image, $path, $size);
                     
                     $roomImage = new RoomTypeImage();

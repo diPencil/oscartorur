@@ -140,7 +140,7 @@
                                       <div class="row mt-3">
                                           @foreach($roomType->images as $img)
                                               <div class="col-md-2 col-sm-3 mb-3 text-center">
-                                                  <img src="{{ getImage(getFilePath('room_type').'/'.$img->image) }}" class="img-thumbnail" style="height: 100px; object-fit: cover;" alt="Room Image">
+                                                  <img src="{{ getImage(getFilePath('roomTypeImage').'/'.$img->image) }}" class="img-thumbnail" style="height: 100px; object-fit: cover;" alt="Room Image">
                                               </div>
                                           @endforeach
                                       </div>
