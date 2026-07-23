@@ -75,6 +75,9 @@ class FormProcessor
 
     public function valueValidation($formData)
     {
+        $formData = is_string($formData) ? json_decode($formData) : $formData;
+        $formData = is_iterable($formData) ? $formData : [];
+        
         $validationRule = [];
         $rule = [];
 
@@ -112,6 +115,9 @@ class FormProcessor
 
     public function processFormData($request, $formData)
     {
+        $formData = is_string($formData) ? json_decode($formData) : $formData;
+        $formData = is_iterable($formData) ? $formData : [];
+        
         $requestForm = [];
         foreach($formData as $data){
             $name = $data->label;
