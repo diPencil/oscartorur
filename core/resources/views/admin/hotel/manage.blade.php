@@ -85,14 +85,14 @@
                                 <div class="col-xl-3 col-lg-6 col-sm-6 mb-30">
                                     <div class="dashboard-w1 bg--success b-radius--10 box-shadow">
                                         <div class="icon">
-                                            <i class="las la-door-open"></i>
+                                            <i class="las la-wifi"></i>
                                         </div>
                                         <div class="details">
                                             <div class="numbers">
-                                                <span class="amount">{{ $hotel->roomTypes->count() }}</span>
+                                                <span class="amount">{{ $hotel->amenities->count() }}</span>
                                             </div>
                                             <div class="desciption">
-                                                <span class="text--small">@lang('Rooms')</span>
+                                                <span class="text--small">@lang('Amenities')</span>
                                             </div>
                                         </div>
                                     </div>
