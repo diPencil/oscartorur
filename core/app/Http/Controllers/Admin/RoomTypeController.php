@@ -71,6 +71,7 @@ class RoomTypeController extends Controller
             'max_adults'     => 'required|integer|min:1',
             'max_children'   => 'required|integer|min:0',
             'max_occupancy'  => 'required|integer|min:1',
+            'base_inventory' => 'required|integer|min:0',
             'beds'           => 'nullable|array',
             'beds.*'         => 'integer|exists:bed_types,id',
             'bed_counts'     => 'nullable|array',
@@ -98,6 +99,7 @@ class RoomTypeController extends Controller
         $roomType->max_adults    = $request->max_adults;
         $roomType->max_children  = $request->max_children;
         $roomType->max_occupancy = $request->max_occupancy;
+        $roomType->base_inventory = $request->base_inventory;
         $roomType->save();
 
         // Sync amenities

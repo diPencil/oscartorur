@@ -55,15 +55,19 @@
                                 </div>
                             </div>
                             
-                            <div class="col-md-4 form-group">
+                            <div class="col-md-3 form-group">
                                 <label>@lang('Max Occupancy') <span class="text-danger">*</span></label>
                                 <input type="number" name="max_occupancy" class="form-control" value="{{ old('max_occupancy', @$roomType->max_occupancy ?? 1) }}" min="1" required>
                             </div>
-                            <div class="col-md-4 form-group">
+                            <div class="col-md-3 form-group">
+                                <label>@lang('Number of Rooms') <span class="text-danger">*</span></label>
+                                <input type="number" name="base_inventory" class="form-control" value="{{ old('base_inventory', @$roomType->base_inventory ?? 0) }}" min="0" required>
+                            </div>
+                            <div class="col-md-3 form-group">
                                 <label>@lang('Max Adults')</label>
                                 <input type="number" name="max_adults" class="form-control" value="{{ old('max_adults', @$roomType->max_adults ?? 1) }}" min="1" required>
                             </div>
-                            <div class="col-md-4 form-group">
+                            <div class="col-md-3 form-group">
                                 <label>@lang('Max Children')</label>
                                 <input type="number" name="max_children" class="form-control" value="{{ old('max_children', @$roomType->max_children ?? 0) }}" min="0" required>
                             </div>
