@@ -23,6 +23,13 @@
 
                                     <div class="mb-3">@php echo  $data->gateway->description @endphp</div>
 
+                                    @if($data->gateway->qr_code)
+                                        <div class="text-center mb-4 mt-3">
+                                            <h5 class="mb-3">@lang('Scan QR Code to Pay')</h5>
+                                            <img src="{{ getImage(getFilePath('gateway').'/'.$data->gateway->qr_code,getFileSize('gateway')) }}" alt="QR Code" class="img-thumbnail" style="max-width: 250px;">
+                                        </div>
+                                    @endif
+
                                 </div>
 
                                 <x-viser-form identifier="id" identifierValue="{{ $gateway->form_id }}" />

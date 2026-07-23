@@ -70,6 +70,29 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="col-lg-3">
+                                        <div class="card border--primary mt-3">
+                                            <h5 class="card-header bg--primary">@lang('QR Code')</h5>
+                                            <div class="card-body">
+                                                <div class="form-group">
+                                                    <div class="image-upload">
+                                                        <div class="thumb">
+                                                            <div class="avatar-preview">
+                                                                <div class="profilePicPreview" style="background-image: url({{ getImage(getFilePath('gateway').'/'.$method->qr_code,getFileSize('gateway')) }})">
+                                                                    <button type="button" class="remove-image"><i class="fa fa-times"></i></button>
+                                                                </div>
+                                                            </div>
+                                                            <div class="avatar-edit">
+                                                                <input type="file" class="profilePicUpload" name="qr_code" id="profilePicUpload2" accept=".png, .jpg, .jpeg">
+                                                                <label for="profilePicUpload2" class="bg--primary">@lang('Upload QR Code')</label>
+                                                                <small class="mt-2 text-facebook">@lang('Supported files'): <b>@lang('jpeg, jpg, png')</b>. @lang('Optional field')</small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="col-lg-6">
                                         <div class="card border--primary mt-3">
                                             <h5 class="card-header bg--primary">@lang('Charge')</h5>

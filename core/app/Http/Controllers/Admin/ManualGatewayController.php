@@ -49,11 +49,22 @@ class ManualGatewayController extends Controller
             }
         }
 
+        $qrCodeFilename = null;
+        if ($request->hasFile('qr_code')) {
+            try {
+                $qrCodeFilename = fileUploader($request->qr_code,getFilePath('gateway'));
+            } catch (\Exception $exp) {
+                $notify[] = ['errors', 'QR Code could not be uploaded'];
+                return back()->withNotify($notify);
+            }
+        }
+
         $method = new Gateway();
         $method->code = $methodCode;
         $method->form_id = @$generate->id ?? 0;
         $method->name = $request->name;
         $method->image = $filename;
+        $method->qr_code = $qrCodeFilename;
         $method->alias = strtolower(trim(str_replace(' ','_',$request->name)));
         $method->status = Status::ENABLE;
         $method->gateway_parameters = json_encode([]);
@@ -104,9 +115,20 @@ class ManualGatewayController extends Controller
             }
         }
 
+        $qrCodeFilename = $method->qr_code;
+        if ($request->hasFile('qr_code')) {
+            try {
+                $qrCodeFilename = fileUploader($request->qr_code,getFilePath('gateway'),old:$qrCodeFilename);
+            } catch (\Exception $exp) {
+                $notify[] = ['errors', 'QR Code could not be uploaded'];
+                return back()->withNotify($notify);
+            }
+        }
+
         $generate = $formProcessor->generate('manual_deposit',true,'id',$method->form_id);
         $method->name = $request->name;
         $method->image = $filename;
+        $method->qr_code = $qrCodeFilename;
         $method->alias = strtolower(trim(str_replace(' ','_',$request->name)));
         $method->gateway_parameters = json_encode([]);
         $method->supported_currencies = [];
@@ -145,6 +167,7 @@ class ManualGatewayController extends Controller
             'fixed_charge'   => 'required|numeric|gte:0',
             'percent_charge' => 'required|numeric|between:0,100',
             'image' => [$isUpdate ? 'nullable' : 'required', 'image', new FileTypeValidate(['jpg', 'jpeg', 'png'])],
+            'qr_code' => ['nullable', 'image', new FileTypeValidate(['jpg', 'jpeg', 'png'])],
             'instruction'    => 'required'
         ];
 
