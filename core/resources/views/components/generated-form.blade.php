@@ -3,7 +3,11 @@
 <div class="form-field__wrapper">
     <div class="addedField simple_with_drop">
         @if ($form)
-            @foreach ($form->form_data as $formData)
+            @php
+                $form_data = is_string($form->form_data) ? json_decode($form->form_data) : $form->form_data;
+                $form_data = is_iterable($form_data) ? $form_data : [];
+            @endphp
+            @foreach ($form_data as $formData)
                 <div class="form-field-wrapper" id="{{ $loop->index }}">
                     <input type="hidden" name="form_generator[is_required][]" value="{{ $formData->is_required }}">
                     <input type="hidden" name="form_generator[extensions][]" value="{{ $formData->extensions }}">
@@ -126,7 +130,11 @@
         "use strict"
         var formGenerator = new FormGenerator();
         @if ($form)
-            formGenerator.totalField = {{ $form ? count((array) $form->form_data) : 0 }}
+            @php
+                $form_data = is_string($form->form_data) ? json_decode($form->form_data) : $form->form_data;
+                $form_data = is_iterable($form_data) ? $form_data : [];
+            @endphp
+            formGenerator.totalField = {{ count((array) $form_data) }}
         @endif
         $(".simple_with_drop").sortable({
             stop: function(event, ui) {
