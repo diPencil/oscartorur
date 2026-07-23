@@ -11,8 +11,12 @@ class Intended {
             return false;
         }
         $intendedUrls = config('intended_routes');
-        $previousRouteName = Route::getRoutes()->match(request()->create(url()->previousPath()))->getName();
-        if (array_key_exists($previousRouteName, $intendedUrls)) {
+        try {
+            $previousRouteName = Route::getRoutes()->match(request()->create(url()->previousPath()))->getName();
+        } catch (\Exception $e) {
+            $previousRouteName = null;
+        }
+        if ($previousRouteName && array_key_exists($previousRouteName, $intendedUrls)) {
             $previousUrl = url()->previous();
             $previousUrlParts = parse_url($previousUrl);
             $queryString = isset($previousUrlParts['query']) ? $previousUrlParts['query'] : '';
