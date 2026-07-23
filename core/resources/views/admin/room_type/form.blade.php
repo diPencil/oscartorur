@@ -56,8 +56,8 @@
                             </div>
                             
                             <div class="col-md-4 form-group">
-                                <label>@lang('Base Capacity')</label>
-                                <input type="number" name="base_capacity" class="form-control" value="{{ old('base_capacity', @$roomType->base_capacity ?? 1) }}" min="1" required>
+                                <label>@lang('Max Occupancy') <span class="text-danger">*</span></label>
+                                <input type="number" name="max_occupancy" class="form-control" value="{{ old('max_occupancy', @$roomType->max_occupancy ?? 1) }}" min="1" required>
                             </div>
                             <div class="col-md-4 form-group">
                                 <label>@lang('Max Adults')</label>

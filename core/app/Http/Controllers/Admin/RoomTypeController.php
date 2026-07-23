@@ -47,6 +47,21 @@ class RoomTypeController extends Controller
 
     public function store(Request $request, $id = 0)
     {
+        $beds = [];
+        $bedCounts = [];
+        if ($request->has('beds')) {
+            foreach ($request->beds as $index => $bedId) {
+                if (!empty($bedId)) {
+                    $beds[] = $bedId;
+                    $bedCounts[] = $request->bed_counts[$index] ?? 1;
+                }
+            }
+        }
+        $request->merge([
+            'beds' => $beds,
+            'bed_counts' => $bedCounts,
+        ]);
+
         $request->validate([
             'hotel_id'       => 'required|integer|exists:hotels,id',
             'name'           => 'required|string|max:255',
@@ -55,7 +70,7 @@ class RoomTypeController extends Controller
             'description_ar' => 'nullable|string',
             'max_adults'     => 'required|integer|min:1',
             'max_children'   => 'required|integer|min:0',
-            'base_capacity'  => 'required|integer|min:1',
+            'max_occupancy'  => 'required|integer|min:1',
             'beds'           => 'nullable|array',
             'beds.*'         => 'integer|exists:bed_types,id',
             'bed_counts'     => 'nullable|array',
@@ -82,7 +97,7 @@ class RoomTypeController extends Controller
         $roomType->description_ar = $request->description_ar;
         $roomType->max_adults    = $request->max_adults;
         $roomType->max_children  = $request->max_children;
-        $roomType->base_capacity = $request->base_capacity;
+        $roomType->max_occupancy = $request->max_occupancy;
         $roomType->save();
 
         // Sync amenities
