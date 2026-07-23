@@ -71,6 +71,8 @@ class Hotel extends Model
             }
         }
 
+        // User requested not to require Contracts and Rate Plans for activation
+        /*
         $activeContracts = HotelContract::where('hotel_id', $this->id)->where('status', 1)->count();
         if ($activeContracts === 0) {
             $errors[] = "At least one active contract is required.";
@@ -85,6 +87,7 @@ class Hotel extends Model
         if ($activeRatePlans === 0) {
             $errors[] = "At least one active rate plan is required.";
         }
+        */
 
         return $errors;
     }
