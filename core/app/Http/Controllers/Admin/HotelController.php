@@ -23,7 +23,9 @@ class HotelController extends Controller
     {
         $pageTitle = 'Add New Hotel';
         $countries = Country::where('status', 1)->orderBy('name')->get();
-        return view('admin.hotel.form', compact('pageTitle', 'countries'));
+        $locations = Location::where('status', 1)->orderBy('name')->get();
+        $suppliers = HotelSupplier::where('status', 1)->orderBy('name')->get();
+        return view('admin.hotel.form', compact('pageTitle', 'countries', 'locations', 'suppliers'));
     }
 
     public function manage($id)
