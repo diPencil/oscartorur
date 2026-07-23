@@ -11,8 +11,13 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="alert alert-primary">
-                                        <p class="mb-0"><i class="las la-info-circle"></i> @lang('You are requesting') <b>{{ showAmount($data['amount']) }}</b> @lang('to deposit.') @lang('Please pay')
+                                        <p class="mb-2"><i class="las la-info-circle"></i> @lang('You are requesting') <b>{{ showAmount($data['amount']) }}</b> @lang('to deposit.') @lang('Please pay')
                                             <b>{{ showAmount($data['final_amount'], currencyFormat: false) . ' ' . $data['method_currency'] }} </b> @lang('for successful payment.')
+                                        </p>
+                                        <hr>
+                                        <p class="mb-0">
+                                            @lang('Your Booking/Payment Reference Code is:'): <b class="text--base fs-5">{{ $data->trx }}</b><br>
+                                            <small>@lang('Please use this code as a reference when transferring money.')</small>
                                         </p>
                                     </div>
 

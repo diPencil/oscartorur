@@ -1,4 +1,9 @@
 <div class="row">
+    @php
+        $formData = $formData ?? [];
+        $formData = is_string($formData) ? json_decode($formData) : $formData;
+        $formData = is_iterable($formData) ? $formData : [];
+    @endphp
     @foreach($formData as $data)
         <div class="col-md-{{ @$data->width ?? '12' }}">
             <div class="form-group">
