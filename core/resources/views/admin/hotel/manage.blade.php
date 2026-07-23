@@ -89,7 +89,7 @@
                                         </div>
                                         <div class="details">
                                             <div class="numbers">
-                                                <span class="amount">{{ $hotel->roomTypes->sum('base_inventory') }}</span>
+                                                <span class="amount">{{ $hotel->roomTypes->count() }}</span>
                                             </div>
                                             <div class="desciption">
                                                 <span class="text--small">@lang('Rooms')</span>
