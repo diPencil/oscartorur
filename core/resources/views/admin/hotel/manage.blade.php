@@ -85,14 +85,14 @@
                                 <div class="col-xl-3 col-lg-6 col-sm-6 mb-30">
                                     <div class="dashboard-w1 bg--success b-radius--10 box-shadow">
                                         <div class="icon">
-                                            <i class="las la-file-contract"></i>
+                                            <i class="las la-door-open"></i>
                                         </div>
                                         <div class="details">
                                             <div class="numbers">
-                                                <span class="amount">{{ \App\Models\HotelContract::where('hotel_id', $hotel->id)->count() }}</span>
+                                                <span class="amount">{{ $hotel->roomTypes->sum('base_inventory') }}</span>
                                             </div>
                                             <div class="desciption">
-                                                <span class="text--small">@lang('Contracts')</span>
+                                                <span class="text--small">@lang('Rooms')</span>
                                             </div>
                                         </div>
                                     </div>
