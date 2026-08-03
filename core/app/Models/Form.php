@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 class Form extends Model
 {
     public $casts = [
-        'form_data'=>'object'
+        'form_data' => 'array',
     ];
 
     public function jsonData(): Attribute

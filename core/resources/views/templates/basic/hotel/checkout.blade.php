@@ -56,10 +56,10 @@
                         </div>
                         <div class="card-body p-4">
                             <div class="d-flex align-items-center mb-3">
-                                <img src="{{ getImage(getFilePath('hotelImage').'/'.@$hotel->images->first()->image, getFileSize('hotelImage')) }}" class="img-thumbnail me-3 object-fit-cover" style="width: 80px; height: 80px;" alt="{{ $hotel->name }}">
+                                <img src="{{ $hotel->display_image_url }}" class="img-thumbnail me-3 object-fit-cover" style="width: 80px; height: 80px;" alt="{{ $hotel->image_alt_text }}">
                                 <div>
                                     <h6 class="mb-1">{{ $hotel->name }}</h6>
-                                    <p class="text-muted small mb-0"><i class="las la-map-marker"></i> {{ $hotel->location->name }}</p>
+                                    <p class="text-muted small mb-0"><i class="las la-map-marker"></i> {{ $hotel->location->display_name }}</p>
                                 </div>
                             </div>
                             
@@ -83,8 +83,8 @@
                             </div>
 
                             <div class="bg-light p-3 rounded mb-3">
-                                <h6 class="mb-2">{{ $ratePlan->contractRoomType->roomType->name }}</h6>
-                                <p class="small text-muted mb-0">{{ $ratePlan->name }} ({{ $ratePlan->refundable ? trans('Refundable') : trans('Non-Refundable') }})</p>
+                                <h6 class="mb-2">{{ app()->getLocale() == 'ar' ? ($ratePlan->contractRoomType->roomType->name_ar ?: $ratePlan->contractRoomType->roomType->name) : $ratePlan->contractRoomType->roomType->name }}</h6>
+                                <p class="small text-muted mb-0">{{ app()->getLocale() == 'ar' ? ($ratePlan->name_ar ?: $ratePlan->name) : $ratePlan->name }} ({{ $ratePlan->refundable ? trans('Refundable') : trans('Non-Refundable') }})</p>
                             </div>
 
                             <hr>

@@ -14,7 +14,7 @@
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             @lang('Hotel')
-                            <span class="fw-bold">{{ $booking->hotel->name }}</span>
+                            <span class="fw-bold">{{ __($booking->hotel_display_name) }}</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             @lang('Check In')
@@ -30,7 +30,7 @@
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             @lang('Amount')
-                            <span class="fw-bold text--base">{{ showAmount($booking->total_price) }} {{ gs()->cur_text }}</span>
+                            <span class="fw-bold text--base">{{ showAmount($booking->total_price) }}</span>
                         </li>
                     </ul>
                 </div>
@@ -126,7 +126,7 @@
                                     <tr>
                                         <td>{{ @$room->roomType->name ?? 'Room' }}</td>
                                         <td>{{ $room->rate_plan_name_snapshot }}</td>
-                                        <td>{{ showAmount($room->price) }} {{ gs()->cur_text }}</td>
+                                        <td>{{ showAmount($room->price) }}</td>
                                         <td>
                                             @foreach($booking->guests->where('booking_room_id', $room->id) as $guest)
                                                 <span class="d-block">

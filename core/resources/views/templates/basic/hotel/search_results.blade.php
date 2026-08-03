@@ -15,7 +15,7 @@
                                     <option value="">@lang('Anywhere')</option>
                                     @foreach($locations as $loc)
                                         <option value="{{ $loc->id }}" @selected(isset($params['location_id']) && $params['location_id'] == $loc->id)>
-                                            {{ $loc->name }}
+                                            {{ $loc->display_name }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -58,23 +58,15 @@
                           <div class="row g-0">
                               <div class="col-md-4 trip-card__thumb">
                                   <div class="hotel-image-carousel">
-                                      @if($hotel->images->count() > 0)
-                                          @foreach($hotel->images as $img)
-                                              <div>
-                                                  <a href="{{ route('hotel.details', [$hotel->id, slug($hotel->name)]) }}?check_in={{ $params['check_in'] }}&check_out={{ $params['check_out'] }}&rooms={{ $params['rooms'] }}&adults={{ $params['adults'] }}&children={{ $params['children'] ?? 0 }}" class="w-100 h-100">
-                                                      <img src="{{ getImage(getFilePath('hotelImage').'/'.$img->image, getFileSize('hotelImage')) }}" class="w-100" style="height: 250px; object-fit: cover;" alt="{{ $hotel->name }}">
-                                                  </a>
-                                              </div>
-                                          @endforeach
-                                      @else
+                                      @foreach($hotel->display_image_urls as $imageUrl)
                                           <div>
                                               <a href="{{ route('hotel.details', [$hotel->id, slug($hotel->name)]) }}?check_in={{ $params['check_in'] }}&check_out={{ $params['check_out'] }}&rooms={{ $params['rooms'] }}&adults={{ $params['adults'] }}&children={{ $params['children'] ?? 0 }}" class="w-100 h-100">
-                                                  <img src="{{ getImage(getFilePath('hotelImage').'/default.png') }}" class="w-100" style="height: 250px; object-fit: cover;" alt="{{ $hotel->name }}">
+                                                  <img src="{{ $imageUrl }}" class="w-100" style="height: 250px; object-fit: cover;" alt="{{ $hotel->image_alt_text }}">
                                               </a>
                                           </div>
-                                      @endif
+                                      @endforeach
                                   </div>
-                                  <div class="trip-card__price" style="z-index: 2;"><span class="fs--14px"></span> {{ showAmount($result['starting_price']) }} {{ gs('cur_text') }}</div>
+                                  <div class="trip-card__price" style="z-index: 2;"><span class="fs--14px"></span> {{ showAmount($result['starting_price']) }}</div>
                               </div>
                               <div class="col-md-8">
                                   <div class="trip-card__content p-4 d-flex flex-column h-100 justify-content-center">
@@ -82,16 +74,16 @@
                                       <ul class="trip-card__meta mt-2">
                                           <li>
                                               <i class="las la-map-marked-alt"></i>
-                                              <p>{{ __(@$hotel->location->name) }}</p>
+                                              <p>{{ @$hotel->location->display_name }}</p>
                                           </li>
                                           <li>
                                               <i class="las la-star text-warning"></i>
-                                              <p>{{ $hotel->star_rating }} @lang('Stars')</p>
+                                              <p>{{ hotelStarLabel($hotel->star_rating) }}</p>
                                           </li>
                                       </ul>
                                       <div class="mt-3 pt-3 border-top d-flex gap-2 text-muted">
                                           @foreach($hotel->amenities->take(5) as $amenity)
-                                              <span style="font-size: 0.85rem;"><i class="{{ $amenity->icon }}"></i> {{ $amenity->name }}</span>
+                                              <span style="font-size: 0.85rem;"><i class="{{ $amenity->icon }}"></i> {{ app()->getLocale() == 'ar' ? ($amenity->name_ar ?: $amenity->name) : $amenity->name }}</span>
                                           @endforeach
                                           @if($hotel->amenities->count() > 5)
                                               <span style="font-size: 0.85rem;">+{{ $hotel->amenities->count() - 5 }} @lang('more')</span>
@@ -158,11 +150,13 @@
         "use strict";
         $(document).ready(function () {
             if ($('.hotel-image-carousel').length) {
+                var isRtl = $('html').attr('dir') === 'rtl';
                 $('.hotel-image-carousel').slick({
                     slidesToShow: 1,
                     slidesToScroll: 1,
                     dots: false,
                     infinite: true,
+                    rtl: isRtl,
                     arrows: true,
                     prevArrow: '<button type="button" class="slick-prev"><i class="las la-angle-left"></i></button>',
                     nextArrow: '<button type="button" class="slick-next"><i class="las la-angle-right"></i></button>'

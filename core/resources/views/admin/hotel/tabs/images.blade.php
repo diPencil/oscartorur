@@ -15,7 +15,7 @@
                                     @php
                                         $cover = $hotel->images()->where('is_cover', 1)->first();
                                     @endphp
-                                    <div class="profilePicPreview" style="background-image: url({{ $cover ? getImage(getFilePath('hotelImage').'/'.$cover->image, getFileSize('hotelImage')) : getImage(null, getFileSize('hotelImage')) }})">
+                                    <div class="profilePicPreview" style="background-image: url({{ $cover ? $cover->display_url : getImage(null, getFileSize('hotelImage')) }})">
                                         <button type="button" class="remove-image"><i class="fa fa-times"></i></button>
                                     </div>
                                 </div>
@@ -57,7 +57,7 @@
                     @forelse($hotel->images()->where('is_cover', 0)->get() as $image)
                         <div class="col-md-4 col-sm-6">
                             <div class="card">
-                                <img src="{{ getImage(getFilePath('hotelImage').'/'.$image->image, getFileSize('hotelImage')) }}" class="card-img-top object-fit-cover" style="height: 150px" alt="{{ $image->title ?? 'Gallery Image' }}">
+                                <img src="{{ $image->display_url }}" class="card-img-top object-fit-cover" style="height: 150px" alt="{{ $image->title ?? trans('Gallery image for :hotel', ['hotel' => $hotel->image_alt_text]) }}">
                                 <div class="card-body p-2 text-center">
                                     <span class="badge badge--info mb-2">{{ $image->category ?? 'General' }}</span>
                                     <form action="{{ route('admin.hotel.image.delete', $image->id) }}" method="POST">

@@ -105,7 +105,7 @@
                                 @forelse($hotelBookings as $booking)
                                     <tr>
                                         <td><span class="fw-bold">{{ $booking->booking_number }}</span></td>
-                                        <td>{{ $booking->hotel->name ?? 'N/A' }}</td>
+                                        <td>{{ __($booking->hotel_display_name) }}</td>
                                         <td>
                                             <div>{{ showDateTime($booking->check_in, 'd M, Y') }}</div>
                                             <div>{{ showDateTime($booking->check_out, 'd M, Y') }}</div>

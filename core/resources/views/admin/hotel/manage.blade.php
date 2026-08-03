@@ -169,7 +169,7 @@
                                                 $cover = $hotel->images()->where('is_cover', 1)->first();
                                             @endphp
                                             @if($cover)
-                                                <img src="{{ getImage(getFilePath('hotelImage').'/'.$cover->image, getFileSize('hotelImage')) }}" alt="Cover" class="img-fluid b-radius--10 mb-3" style="max-height: 200px; width: 100%; object-fit: cover;">
+                                                <img src="{{ $cover->display_url }}" alt="{{ $hotel->image_alt_text }}" class="img-fluid b-radius--10 mb-3" style="max-height: 200px; width: 100%; object-fit: cover;">
                                             @else
                                                 <div class="bg--light b-radius--10 d-flex justify-content-center align-items-center mb-3" style="height: 150px;">
                                                     <span class="text-muted"><i class="las la-image" style="font-size: 40px;"></i><br>@lang('No Cover Image')</span>

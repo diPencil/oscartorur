@@ -122,6 +122,35 @@ class Hotel extends Model
         return $this->hasMany(HotelImage::class);
     }
 
+    public function getDisplayImageUrlsAttribute(): array
+    {
+        $images = $this->relationLoaded('images') ? $this->images : $this->images()->get();
+
+        $urls = $images
+            ->sortBy('id')
+            ->sortByDesc('is_cover')
+            ->map(fn ($image) => $image->display_url)
+            ->filter()
+            ->values()
+            ->all();
+
+        return $urls ?: [getImage(getFilePath('hotelImage') . '/default.png')];
+    }
+
+    public function getDisplayImageUrlAttribute(): string
+    {
+        return $this->display_image_urls[0];
+    }
+
+    public function getImageAltTextAttribute(): string
+    {
+        $name = app()->getLocale() == 'ar' && !empty($this->name_ar)
+            ? $this->name_ar
+            : $this->getRawOriginal('name');
+
+        return trim((string) $name) ?: trans('Hotel image');
+    }
+
     public function roomTypes()
     {
         return $this->hasMany(RoomType::class);

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class HotelBooking extends Model
@@ -14,6 +15,15 @@ class HotelBooking extends Model
     public function hotel()
     {
         return $this->belongsTo(Hotel::class);
+    }
+
+    public function hotelDisplayName(): Attribute
+    {
+        return Attribute::get(function ($value, $attributes) {
+            return $this->getRelationValue('hotel')?->name
+                ?? $attributes['hotel_name_snapshot'] ?? null
+                ?? trans('Hotel unavailable');
+        });
     }
 
     public function user()

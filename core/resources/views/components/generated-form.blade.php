@@ -4,27 +4,40 @@
     <div class="addedField simple_with_drop">
         @if ($form)
             @php
-                $form_data = is_string($form->form_data) ? json_decode($form->form_data) : $form->form_data;
+                $form_data = is_string($form->form_data) ? json_decode($form->form_data, true) : $form->form_data;
                 $form_data = is_iterable($form_data) ? $form_data : [];
             @endphp
             @foreach ($form_data as $formData)
+                @php
+                    $options = data_get($formData, 'options', []);
+                    if (is_string($options)) {
+                        $decodedOptions = json_decode($options, true);
+                        $options = json_last_error() === JSON_ERROR_NONE ? $decodedOptions : explode(',', $options);
+                    }
+                    $options = is_array($options) ? array_values(array_filter($options, fn ($option) => $option !== null && $option !== '')) : [];
+
+                    $extensions = data_get($formData, 'extensions', '');
+                    if (is_array($extensions)) {
+                        $extensions = implode(',', $extensions);
+                    }
+                @endphp
                 <div class="form-field-wrapper" id="{{ $loop->index }}">
-                    <input type="hidden" name="form_generator[is_required][]" value="{{ $formData->is_required }}">
-                    <input type="hidden" name="form_generator[extensions][]" value="{{ $formData->extensions }}">
-                    <input type="hidden" name="form_generator[options][]" value="{{ implode(',', $formData->options) }}">
-                    <input type="hidden" name="form_generator[form_width][]" value="{{ @$formData->width }}">
-                    <input type="hidden" name="form_generator[form_label][]" class="form-control" value="{{ $formData->name }}">
-                    <input type="hidden" name="form_generator[instruction][]" class="form-control" value="{{ @$formData->instruction }}">
-                    <input type="hidden" name="form_generator[form_type][]" class="form-control" value="{{ $formData->type }}">
+                    <input type="hidden" name="form_generator[is_required][]" value="{{ data_get($formData, 'is_required') }}">
+                    <input type="hidden" name="form_generator[extensions][]" value="{{ $extensions }}">
+                    <input type="hidden" name="form_generator[options][]" value="{{ implode(',', $options) }}">
+                    <input type="hidden" name="form_generator[form_width][]" value="{{ data_get($formData, 'width') }}">
+                    <input type="hidden" name="form_generator[form_label][]" class="form-control" value="{{ data_get($formData, 'name') }}">
+                    <input type="hidden" name="form_generator[instruction][]" class="form-control" value="{{ data_get($formData, 'instruction') }}">
+                    <input type="hidden" name="form_generator[form_type][]" class="form-control" value="{{ data_get($formData, 'type') }}">
                     @php
                         $jsonData = json_encode([
-                            'type' => $formData->type,
-                            'is_required' => $formData->is_required,
-                            'instruction' => @$formData->instruction,
-                            'label' => $formData->name,
-                            'extensions' => explode(',', $formData->extensions) ?? 'null',
-                            'options' => $formData->options,
-                            'width' => @$formData->width,
+                            'type' => data_get($formData, 'type'),
+                            'is_required' => data_get($formData, 'is_required'),
+                            'instruction' => data_get($formData, 'instruction'),
+                            'label' => data_get($formData, 'name'),
+                            'extensions' => $extensions ? explode(',', $extensions) : [],
+                            'options' => $options,
+                            'width' => data_get($formData, 'width'),
                             'old_id' => '',
                         ]);
                     @endphp
@@ -36,23 +49,23 @@
                             </div>
                             <div>
                                 <p class="title">@lang('Name')</p>
-                                <p class="value">{{ __(@$formData->name) }}</p>
+                                <p class="value">{{ __(data_get($formData, 'name')) }}</p>
                             </div>
                         </div>
                         <div class="form-field__item">
                             <p class="title">@lang('Type')</p>
-                            <p class="value">{{ __(ucfirst($formData->type)) }}</p>
+                            <p class="value">{{ __(ucfirst((string) data_get($formData, 'type'))) }}</p>
                         </div>
                         <div class="form-field__item">
                             <p class="title">@lang('Width')</p>
                             <p class="value">
-                                @if (@$formData->width == '12')
+                                @if (data_get($formData, 'width') == '12')
                                     @lang('100%')
-                                @elseif(@$formData->width == '6')
+                                @elseif(data_get($formData, 'width') == '6')
                                     @lang('50%')
-                                @elseif(@$formData->width == '4')
+                                @elseif(data_get($formData, 'width') == '4')
                                     @lang('33%')
-                                @elseif(@$formData->width == '3')
+                                @elseif(data_get($formData, 'width') == '3')
                                     @lang('25%')
                                 @else
                                     -
@@ -61,7 +74,7 @@
                         </div>
                         <div class="form-field__item">
                             <p class="value">
-                                @if ($formData->is_required == 'required')
+                                @if (data_get($formData, 'is_required') == 'required')
                                     <span class="badge badge--success">@lang('Required')</span>
                                 @else
                                     <span class="badge badge--dark">@lang('Optional')</span>
@@ -131,7 +144,7 @@
         var formGenerator = new FormGenerator();
         @if ($form)
             @php
-                $form_data = is_string($form->form_data) ? json_decode($form->form_data) : $form->form_data;
+                $form_data = is_string($form->form_data) ? json_decode($form->form_data, true) : $form->form_data;
                 $form_data = is_iterable($form_data) ? $form_data : [];
             @endphp
             formGenerator.totalField = {{ count((array) $form_data) }}

@@ -3,6 +3,8 @@
 namespace App\Lib;
 
 use App\Models\Form;
+use Illuminate\Support\Collection;
+use Illuminate\Validation\ValidationException;
 
 class FormProcessor
 {
@@ -75,38 +77,38 @@ class FormProcessor
 
     public function valueValidation($formData)
     {
-        $formData = is_string($formData) ? json_decode($formData) : $formData;
-        $formData = is_iterable($formData) ? $formData : [];
-        
+        $formData = $this->normalizeFormData($formData);
         $validationRule = [];
         $rule = [];
 
         foreach($formData as $data){
-            if ($data->is_required == 'required') {
+            if ($data['is_required'] == 'required') {
                 $rule = array_merge($rule,['required']);
             }else{
                 $rule = array_merge($rule,['nullable']);
             }
-            if ($data->type == 'select' || $data->type == 'checkbox' || $data->type == 'radio'){
-                $rule = array_merge($rule,['in:'. implode(',',$data->options)]);
+            if ($data['type'] == 'select' || $data['type'] == 'checkbox' || $data['type'] == 'radio'){
+                if ($data['options']) {
+                    $rule = array_merge($rule,['in:'. implode(',',$data['options'])]);
+                }
             }
-            if ($data->type == 'file') {
-                $rule = array_merge($rule,['mimes:'.$data->extensions]);
+            if ($data['type'] == 'file' && $data['extensions']) {
+                $rule = array_merge($rule,['mimes:'.implode(',', $data['extensions'])]);
             }
-            if ($data->type == 'email') {
+            if ($data['type'] == 'email') {
                 $rule = array_merge($rule,['email']);
             }
-            if ($data->type == 'url') {
+            if ($data['type'] == 'url') {
                 $rule = array_merge($rule,['url']);
             }
-            if ($data->type == 'number') {
+            if ($data['type'] == 'number') {
                 $rule = array_merge($rule,['integer']);
             }
-            if ($data->type == 'checkbox') {
+            if ($data['type'] == 'checkbox') {
                 $rule = array_merge($rule,['array']);
-                $validationRule[$data->label] = $rule;
+                $validationRule[$data['label']] = $rule;
             }else{
-                $validationRule[$data->label] = $rule;
+                $validationRule[$data['label']] = $rule;
             }
             $rule = [];
         }
@@ -115,14 +117,12 @@ class FormProcessor
 
     public function processFormData($request, $formData)
     {
-        $formData = is_string($formData) ? json_decode($formData) : $formData;
-        $formData = is_iterable($formData) ? $formData : [];
-        
+        $formData = $this->normalizeFormData($formData);
         $requestForm = [];
         foreach($formData as $data){
-            $name = $data->label;
+            $name = $data['label'];
             $value = $request->$name;
-            if($data->type == 'file') {
+            if($data['type'] == 'file') {
                 if($request->hasFile($name)){
                     $directory = date("Y")."/".date("m")."/".date("d");
                     $path = getFilePath('verify').'/'.$directory;
@@ -132,12 +132,160 @@ class FormProcessor
                 }
             }
             $requestForm[] = [
-                'name'=>$data->name,
-                'type'=>$data->type,
+                'name'=>$data['name'],
+                'type'=>$data['type'],
                 'value'=>$value,
             ];
         }
         return $requestForm;
+    }
+
+    public function normalizeFormData($formData): array
+    {
+        $decoded = $this->decodeJsonValue($formData);
+
+        if ($decoded instanceof Collection) {
+            $decoded = $decoded->all();
+        }
+
+        if ($decoded === null || $decoded === '' || $decoded === []) {
+            return [];
+        }
+
+        if (is_object($decoded)) {
+            $decoded = get_object_vars($decoded);
+        }
+
+        if (!is_array($decoded)) {
+            $this->invalidFormData('Unsupported dynamic form payload', $formData);
+        }
+
+        if (isset($decoded['label'], $decoded['type'])) {
+            $decoded = [$decoded];
+        }
+
+        $normalized = [];
+        foreach ($decoded as $field) {
+            if (is_object($field)) {
+                $field = get_object_vars($field);
+            }
+
+            if (!is_array($field)) {
+                $this->invalidFormData('Unsupported dynamic form field', $field);
+            }
+
+            $label = $field['label'] ?? null;
+            $type = $field['type'] ?? null;
+            $name = $field['name'] ?? $label;
+
+            if (!$label || !$type || !$name) {
+                $this->invalidFormData('Dynamic form field is missing required keys', $field);
+            }
+
+            $normalized[] = [
+                'name'        => $name,
+                'label'       => $label,
+                'is_required' => ($field['is_required'] ?? null) === 'required' ? 'required' : 'optional',
+                'instruction' => $field['instruction'] ?? null,
+                'extensions'  => $this->normalizeList($field['extensions'] ?? []),
+                'options'     => $this->normalizeList($field['options'] ?? []),
+                'type'        => $type,
+                'width'       => $field['width'] ?? null,
+            ];
+        }
+
+        return $normalized;
+    }
+
+    private function normalizeList($value): array
+    {
+        $value = $this->decodeJsonValue($value, false);
+
+        if ($value instanceof Collection) {
+            $value = $value->all();
+        }
+
+        if (is_object($value)) {
+            $value = get_object_vars($value);
+        }
+
+        if ($value === null || $value === '' || $value === 'null') {
+            return [];
+        }
+
+        if (is_string($value)) {
+            $value = explode(',', $value);
+        }
+
+        if (!is_array($value)) {
+            return [];
+        }
+
+        return array_values(array_filter(array_map(function ($item) {
+            return is_scalar($item) ? trim((string) $item) : null;
+        }, $value), fn ($item) => $item !== null && $item !== ''));
+    }
+
+    private function decodeJsonValue($value, bool $failOnInvalidString = true)
+    {
+        if (!is_string($value)) {
+            return $value;
+        }
+
+        $trimmed = trim($value);
+        if ($trimmed === '') {
+            return [];
+        }
+
+        $decoded = json_decode($trimmed, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            if (is_string($decoded) && $this->looksLikeJson($decoded)) {
+                $doubleDecoded = json_decode($decoded, true);
+
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    return $doubleDecoded;
+                }
+            }
+
+            return $decoded;
+        }
+
+        if ($failOnInvalidString) {
+            $this->invalidFormData('Invalid JSON dynamic form payload', $value);
+        }
+
+        return $value;
+    }
+
+    private function invalidFormData(string $reason, $value): void
+    {
+        if (function_exists('app') && app()->bound('log')) {
+            logger()->warning($reason, [
+                'type' => get_debug_type($value),
+                'length' => is_scalar($value) ? strlen((string) $value) : null,
+                'sha256' => is_scalar($value) ? hash('sha256', (string) $value) : null,
+            ]);
+        }
+
+        throw ValidationException::withMessages([
+            'form' => $this->validationMessage('Unable to process this payment method. Please contact support.'),
+        ]);
+    }
+
+    private function validationMessage(string $message): string
+    {
+        if (function_exists('app') && app()->bound('translator')) {
+            return trans($message);
+        }
+
+        return $message;
+    }
+
+    private function looksLikeJson(string $value): bool
+    {
+        $trimmed = trim($value);
+
+        return str_starts_with($trimmed, '{') || str_starts_with($trimmed, '[');
     }
 
     public function supportedExt()

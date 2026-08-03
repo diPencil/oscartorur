@@ -157,7 +157,10 @@ class HotelController extends Controller
         
         // Delete related images from storage
         foreach ($hotel->images as $image) {
-            fileManager()->removeFile(getFilePath('hotelImage') . '/' . $image->image);
+            $imagePath = html_entity_decode((string) $image->image, ENT_QUOTES, 'UTF-8');
+            if (!filter_var($imagePath, FILTER_VALIDATE_URL) && !preg_match('/https?:\/\//', $imagePath)) {
+                fileManager()->removeFile(getFilePath('hotelImage') . '/' . $image->image);
+            }
             $image->delete();
         }
         

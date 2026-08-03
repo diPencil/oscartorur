@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ config('app.locale') }}" dir="{{ session('lang') == 'ar' ? 'rtl' : 'ltr' }}" itemscope itemtype="http://schema.org/WebPage">
+<html lang="{{ session('lang', config('app.locale')) }}" dir="{{ session('lang') == 'ar' ? 'rtl' : 'ltr' }}" itemscope itemtype="http://schema.org/WebPage">
 
 <head>
     <!-- Required meta tags -->

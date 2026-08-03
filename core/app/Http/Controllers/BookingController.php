@@ -36,7 +36,7 @@ class BookingController extends Controller
             'adults'       => 'required|integer|min:1',
         ]);
 
-        $hotel = Hotel::findOrFail($request->hotel_id);
+        $hotel = Hotel::with(['location', 'images'])->findOrFail($request->hotel_id);
         $ratePlan = RatePlan::with(['contractRoomType.roomType'])->findOrFail($request->rate_plan_id);
 
         $params = $request->only(['check_in', 'check_out', 'rooms', 'adults']);
@@ -315,6 +315,7 @@ class BookingController extends Controller
             $booking->booking_number = 'HB-' . strtoupper(Str::random(8));
             $booking->user_id = auth()->id() ?? null;
             $booking->hotel_id = $hotel->id;
+            $booking->hotel_name_snapshot = $hotel->name;
             $booking->check_in = $request->check_in;
             $booking->check_out = $request->check_out;
             $booking->rooms_count = $request->rooms;

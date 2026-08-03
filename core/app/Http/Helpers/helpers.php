@@ -116,15 +116,29 @@ function showAmount($amount, $decimal = 2, $separate = true, $exceptZeros = fals
         }
     }
     if ($currencyFormat) {
+        $currencyText = gs('cur_text');
+        $currencySymbol = gs('cur_sym');
+        $sameCurrencyLabel = strcasecmp((string) $currencyText, (string) $currencySymbol) === 0;
+
         if (gs('currency_format') == Status::CUR_BOTH) {
-            return gs('cur_sym') . $printAmount . ' ' . __(gs('cur_text'));
+            return $sameCurrencyLabel ? $printAmount . ' ' . $currencyText : $currencySymbol . $printAmount . ' ' . $currencyText;
         } else if (gs('currency_format') == Status::CUR_TEXT) {
-            return $printAmount . ' ' . __(gs('cur_text'));
+            return $printAmount . ' ' . $currencyText;
         } else {
-            return gs('cur_sym') . $printAmount;
+            return $sameCurrencyLabel ? $printAmount . ' ' . $currencyText : $currencySymbol . $printAmount;
         }
     }
     return $printAmount;
+}
+
+function hotelStarLabel($rating) {
+    $rating = (int) $rating;
+
+    if (app()->getLocale() == 'ar') {
+        return $rating === 1 ? 'نجمة واحدة' : $rating . ' نجوم';
+    }
+
+    return $rating . ' ' . trans($rating === 1 ? 'Star' : 'Stars');
 }
 
 function removeElement($array, $value) {
@@ -180,17 +194,43 @@ function getPageSections($arr = false) {
 }
 
 function getImage($image, $size = null) {
+    $image = trim(html_entity_decode((string) $image, ENT_QUOTES, 'UTF-8'));
+
+    if (!$image) {
+        return $size ? route('placeholder.image', $size) : asset('assets/images/default.png');
+    }
+
+    $image = str_replace('\\', '/', $image);
+    $lastHttpPosition = max((int) strrpos($image, 'http://'), (int) strrpos($image, 'https://'));
+
+    if ($lastHttpPosition > 0) {
+        $image = substr($image, $lastHttpPosition);
+    }
+
     if (filter_var($image, FILTER_VALIDATE_URL)) {
         return $image;
     }
-    
+
     if (preg_match('/(https?:\/\/[^\s]+)/', $image, $matches)) {
         return $matches[1];
     }
-    
+
+    if (str_starts_with($image, url('/'))) {
+        return $image;
+    }
+
+    $assetPath = ltrim($image, '/');
     $clean = '';
-    if (file_exists($image) && is_file($image)) {
-        return asset($image) . $clean;
+    $candidatePaths = [
+        $assetPath,
+        base_path($assetPath),
+        base_path('../' . $assetPath),
+    ];
+
+    foreach ($candidatePaths as $candidatePath) {
+        if (file_exists($candidatePath) && is_file($candidatePath)) {
+            return asset($assetPath) . $clean;
+        }
     }
     if ($size) {
         return route('placeholder.image', $size);

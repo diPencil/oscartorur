@@ -23,7 +23,7 @@
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 @lang('Hotel')
-                                <span class="fw-bold">{{ $booking->hotel->name }}</span>
+                                <span class="fw-bold">{{ __($booking->hotel_display_name) }}</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 @lang('Check In')
@@ -69,7 +69,7 @@
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 @lang('Total Amount')
-                                <span class="fw-bold text--base fs-5">{{ $general->cur_sym }}{{ showAmount($booking->total_price) }}</span>
+                                <span class="fw-bold text--base fs-5">{{ showAmount($booking->total_price) }}</span>
                             </li>
                         </ul>
                     </div>

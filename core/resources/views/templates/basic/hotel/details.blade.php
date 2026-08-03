@@ -199,7 +199,7 @@
                     </div>
                 </div>
                 
-                <p class="text-muted mb-2"><i class="las la-map-marker-alt text-primary-brand"></i> {{ $hotel->location->name }} - {{ app()->getLocale() == 'ar' ? ($hotel->address_ar ?: $hotel->address) : $hotel->address }}</p>
+                <p class="text-muted mb-2"><i class="las la-map-marker-alt text-primary-brand"></i> {{ $hotel->location->display_name }} - {{ app()->getLocale() == 'ar' ? ($hotel->address_ar ?: $hotel->address) : $hotel->address }}</p>
             </div>
             <div class="col-md-4 text-md-end mt-3 mt-md-0">
                 <button class="btn btn-outline-secondary rounded-pill me-2"><i class="las la-share-alt"></i> @lang('Share')</button>
@@ -209,39 +209,41 @@
 
         <!-- Images Grid -->
         <div class="hotel-image-grid">
-            @php $images = $hotel->images; @endphp
-            @if($images->isNotEmpty())
+            @php
+                $imageUrls = collect($hotel->display_image_urls);
+            @endphp
+            @if($imageUrls->isNotEmpty())
                 <div class="grid-img-main">
-                    <a href="{{ getImage(getFilePath('hotelImage').'/'.$images->first()->image) }}" data-rel="lightcase:hotelGallery" class="d-block w-100 h-100" title=" ">
-                        <img src="{{ getImage(getFilePath('hotelImage').'/'.$images->first()->image, getFileSize('hotelImage')) }}" class="grid-img-item" alt="">
+                    <a href="{{ $imageUrls->first() }}" data-rel="lightcase:hotelGallery" class="d-block w-100 h-100" title="{{ $hotel->image_alt_text }}">
+                        <img src="{{ $imageUrls->first() }}" class="grid-img-item" alt="{{ $hotel->image_alt_text }}">
                     </a>
                 </div>
                 <div class="grid-right-col">
                     @php 
-                        $topImages = $images->skip(1)->take(2);
-                        $bottomImage = $images->skip(3)->first();
-                        $hiddenImages = $images->skip(4);
+                        $topImages = $imageUrls->skip(1)->take(2);
+                        $bottomImage = $imageUrls->skip(3)->first();
+                        $hiddenImages = $imageUrls->skip(4);
                     @endphp
                     
-                    @foreach($topImages as $img)
+                    @foreach($topImages as $imageUrl)
                         <div class="w-100 h-100">
-                            <a href="{{ getImage(getFilePath('hotelImage').'/'.$img->image) }}" data-rel="lightcase:hotelGallery" class="d-block w-100 h-100" title=" ">
-                                <img src="{{ getImage(getFilePath('hotelImage').'/'.$img->image, getFileSize('hotelImage')) }}" class="grid-img-item grid-img-top-left" alt="">
+                            <a href="{{ $imageUrl }}" data-rel="lightcase:hotelGallery" class="d-block w-100 h-100" title="{{ $hotel->image_alt_text }}">
+                                <img src="{{ $imageUrl }}" class="grid-img-item grid-img-top-left" alt="{{ $hotel->image_alt_text }}">
                             </a>
                         </div>
                     @endforeach
                     
                     @if($bottomImage)
                         <div class="grid-img-bottom w-100 h-100">
-                            <a href="{{ getImage(getFilePath('hotelImage').'/'.$bottomImage->image) }}" data-rel="lightcase:hotelGallery" class="d-block w-100 h-100" title=" ">
-                                <img src="{{ getImage(getFilePath('hotelImage').'/'.$bottomImage->image, getFileSize('hotelImage')) }}" class="grid-img-item" alt="">
+                            <a href="{{ $bottomImage }}" data-rel="lightcase:hotelGallery" class="d-block w-100 h-100" title="{{ $hotel->image_alt_text }}">
+                                <img src="{{ $bottomImage }}" class="grid-img-item" alt="{{ $hotel->image_alt_text }}">
                             </a>
                         </div>
                     @endif
                     
                     {{-- Hidden images for the gallery album to be complete --}}
-                    @foreach($hiddenImages as $img)
-                        <a href="{{ getImage(getFilePath('hotelImage').'/'.$img->image) }}" data-rel="lightcase:hotelGallery" class="d-none" title=" "></a>
+                    @foreach($hiddenImages as $imageUrl)
+                        <a href="{{ $imageUrl }}" data-rel="lightcase:hotelGallery" class="d-none" title="{{ $hotel->image_alt_text }}"></a>
                     @endforeach
                 </div>
             @endif
@@ -293,14 +295,14 @@
                                         <span><i class="las la-user-friends"></i> @lang('Adults'): {{ $roomType->max_adults }}</span>
                                         <span><i class="las la-child"></i> @lang('Children'): {{ $roomType->max_children }}</span>
                                         @foreach($roomType->amenities->take(3) as $amenity)
-                                            <span><i class="{{ $amenity->icon }}"></i> {{ $amenity->name }}</span>
+                                            <span><i class="{{ $amenity->icon }}"></i> {{ app()->getLocale() == 'ar' ? ($amenity->name_ar ?: $amenity->name) : $amenity->name }}</span>
                                         @endforeach
                                     </div>
                                 </div>
                                 <div class="mt-3 mt-md-0">
                                       @if($roomType->images->first())
                                           <a href="{{ getImage(getFilePath('roomTypeImage').'/'.@$roomType->images->first()->image) }}" data-rel="lightcase">
-                                              <img src="{{ getImage(getFilePath('roomTypeImage').'/'.@$roomType->images->first()->image, getFileSize('roomTypeImage')) }}" class="rounded" style="width: 120px; height: 80px; object-fit: cover;" alt="{{ $roomType->name }}">
+                                              <img src="{{ getImage(getFilePath('roomTypeImage').'/'.@$roomType->images->first()->image, getFileSize('roomTypeImage')) }}" class="rounded" style="width: 120px; height: 80px; object-fit: cover;" alt="{{ app()->getLocale() == 'ar' ? ($roomType->name_ar ?: $roomType->name) : $roomType->name }}">
                                           </a>
                                       @endif
                                   </div>
@@ -418,7 +420,7 @@
                                     $percentage = $totalReviews > 0 ? ($starsCount[$star] / $totalReviews) * 100 : 0;
                                 @endphp
                                 <div class="d-flex align-items-center mb-3">
-                                    <span style="width: 60px;" class="text-muted">{{ $star }} @if($star == 1) @lang('Star') @else @lang('Stars') @endif</span>
+                                    <span style="width: 60px;" class="text-muted">{{ hotelStarLabel($star) }}</span>
                                     <div class="progress flex-grow-1 mx-3" style="height: 10px;">
                                         <div class="progress-bar bg-primary-brand" role="progressbar" style="width: {{ $percentage }}%" aria-valuenow="{{ $percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
                                     </div>

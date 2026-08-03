@@ -36,13 +36,14 @@ class HotelImageController extends Controller
                 return back()->withNotify($notify);
             }
         } else {
-            $filename = $request->image_url;
+            $filename = trim($request->image_url);
         }
 
         // Delete existing cover if exists and not an external URL
         $existingCover = HotelImage::where('hotel_id', $hotel_id)->where('is_cover', 1)->first();
         if ($existingCover) {
-            if (!filter_var($existingCover->image, FILTER_VALIDATE_URL)) {
+            $existingImagePath = html_entity_decode((string) $existingCover->image, ENT_QUOTES, 'UTF-8');
+            if (!filter_var($existingImagePath, FILTER_VALIDATE_URL) && !preg_match('/https?:\/\//', $existingImagePath)) {
                 fileManager()->removeFile($path . '/' . $existingCover->image);
             }
             $existingCover->delete();
@@ -100,7 +101,7 @@ class HotelImageController extends Controller
         if ($request->image_url) {
             $hotelImage = new HotelImage();
             $hotelImage->hotel_id = $hotel_id;
-            $hotelImage->image = $request->image_url;
+            $hotelImage->image = trim($request->image_url);
             $hotelImage->category = $request->category;
             $hotelImage->title = $request->title;
             $hotelImage->is_cover = 0;
@@ -114,7 +115,8 @@ class HotelImageController extends Controller
     public function delete($id)
     {
         $hotelImage = HotelImage::findOrFail($id);
-        if (!filter_var($hotelImage->image, FILTER_VALIDATE_URL)) {
+        $imagePath = html_entity_decode((string) $hotelImage->image, ENT_QUOTES, 'UTF-8');
+        if (!filter_var($imagePath, FILTER_VALIDATE_URL) && !preg_match('/https?:\/\//', $imagePath)) {
             $path = getFilePath('hotelImage');
             fileManager()->removeFile($path . '/' . $hotelImage->image);
         }

@@ -21,10 +21,10 @@
                             @forelse($bookings as $booking)
                                 <tr>
                                     <td><span class="fw-bold">{{ $booking->booking_number }}</span></td>
-                                    <td>{{ $booking->hotel->name }}</td>
+                                    <td>{{ __($booking->hotel_display_name) }}</td>
                                     <td>{{ showDateTime($booking->check_in, 'd M Y') }} - {{ showDateTime($booking->check_out, 'd M Y') }}</td>
                                     <td>{{ $booking->rooms_count }}</td>
-                                    <td>{{ gs('cur_sym') }}{{ showAmount($booking->total_price) }}</td>
+                                    <td>{{ showAmount($booking->total_price) }}</td>
                                     <td>
                                         @if($booking->booking_status == 'pending')
                                             <span class="badge badge--warning">@lang('Pending')</span>

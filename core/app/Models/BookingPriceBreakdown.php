@@ -8,4 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class BookingPriceBreakdown extends Model
 {
     use HasFactory;
+
+    protected $table = 'booking_price_breakdown';
 }

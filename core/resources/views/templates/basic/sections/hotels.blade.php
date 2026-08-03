@@ -1,5 +1,5 @@
 @php
-    $hotels = \App\Models\Hotel::active()->with('location')->latest()->take(6)->get();
+    $hotels = \App\Models\Hotel::active()->with(['location', 'images'])->latest()->take(6)->get();
 @endphp
 
 <section class="pt-100 pb-100 bg_img white--overlay" style="background-color: #f7f9fa;">
@@ -19,35 +19,27 @@
                     <div class="trip-card h-100 hotel-card-custom">
                         <div class="trip-card__thumb">
                             <div class="hotel-image-carousel-home">
-                                @if($hotel->images->count() > 0)
-                                    @foreach($hotel->images as $img)
-                                        <div>
-                                            <a href="{{ route('hotel.details', [$hotel->id, slug($hotel->name)]) }}" class="w-100 h-100">
-                                                <img src="{{ getImage(getFilePath('hotelImage') . '/' . $img->image) }}" alt="{{ __($hotel->name) }}" class="w-100" style="height: 250px; object-fit: cover;">
-                                            </a>
-                                        </div>
-                                    @endforeach
-                                @else
+                                @foreach($hotel->display_image_urls as $imageUrl)
                                     <div>
                                         <a href="{{ route('hotel.details', [$hotel->id, slug($hotel->name)]) }}" class="w-100 h-100">
-                                            <img src="{{ getImage(getFilePath('hotelImage') . '/default.png') }}" alt="{{ __($hotel->name) }}" class="w-100" style="height: 250px; object-fit: cover;">
+                                            <img src="{{ $imageUrl }}" alt="{{ $hotel->image_alt_text }}" class="w-100" style="height: 250px; object-fit: cover;">
                                         </a>
                                     </div>
-                                @endif
+                                @endforeach
                             </div>
                             
-                            <div class="trip-card__price" style="z-index: 2;"><span class="fs--14px"></span> {{ showAmount($hotel->starting_price) }} {{ gs('cur_text') }}</div>
+                            <div class="trip-card__price" style="z-index: 2;"><span class="fs--14px"></span> {{ showAmount($hotel->starting_price) }}</div>
                         </div>
                         <div class="trip-card__content p-4">
                             <h5 class="trip-card__title"><a href="{{ route('hotel.details', [$hotel->id, slug($hotel->name)]) }}">{{ __($hotel->name) }}</a></h5>
                             <ul class="trip-card__meta mt-2">
                                 <li>
                                     <i class="las la-map-marked-alt"></i>
-                                    <p>{{ __(@$hotel->location->name) }}</p>
+                                    <p>{{ @$hotel->location->display_name }}</p>
                                 </li>
                                 <li>
                                     <i class="las la-star text-warning"></i>
-                                    <p>{{ $hotel->star_rating }} @lang('Stars')</p>
+                                    <p>{{ hotelStarLabel($hotel->star_rating) }}</p>
                                 </li>
                             </ul>
                         </div>
@@ -109,11 +101,13 @@
         "use strict";
         $(document).ready(function () {
             if ($('.hotel-image-carousel-home').length) {
+                var isRtl = $('html').attr('dir') === 'rtl';
                 $('.hotel-image-carousel-home').not('.slick-initialized').slick({
                     slidesToShow: 1,
                     slidesToScroll: 1,
                     dots: false,
                     infinite: true,
+                    rtl: isRtl,
                     arrows: true,
                     prevArrow: '<button type="button" class="slick-prev"><i class="las la-angle-left"></i></button>',
                     nextArrow: '<button type="button" class="slick-next"><i class="las la-angle-right"></i></button>'

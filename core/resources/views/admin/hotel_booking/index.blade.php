@@ -33,7 +33,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <span class="fw-bold">{{ $booking->hotel?->name ?? 'Deleted Hotel' }}</span>
+                                        <span class="fw-bold">{{ __($booking->hotel_display_name) }}</span>
                                     </td>
                                     <td>
                                         {{ showDateTime($booking->check_in, 'd M, Y') }} <br>
@@ -41,7 +41,7 @@
                                     </td>
                                     <td>{{ $booking->rooms_count }}</td>
                                     <td>
-                                        <span class="fw-bold">{{ showAmount($booking->total_price) }} {{ gs()->cur_text }}</span>
+                                        <span class="fw-bold">{{ showAmount($booking->total_price) }}</span>
                                     </td>
                                     <td>
                                         @if($booking->booking_status == 'pending')

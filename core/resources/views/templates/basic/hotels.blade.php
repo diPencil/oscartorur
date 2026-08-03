@@ -26,7 +26,7 @@
                                             <div class="left">
                                                 <input class="form-check-input" id="loc-{{ $location->id }}" name="location_id[]" type="checkbox" value="{{ $location->id }}" @if (in_array($location->id, $selectedLocations)) checked @endif>
                                                 <label class="form-check-label" for="loc-{{ $location->id }}">
-                                                    {{ __($location->name) }}
+                                                    {{ $location->display_name }}
                                                 </label>
                                             </div>
                                             <label class="fs--14px mt-1" for="loc-{{ $location->id }}">({{ $location->hotels()->active()->count() }})</label>
@@ -59,7 +59,7 @@
 
                 <div class="col-lg-9">
                     <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm border">
-                        <h5 class="mb-0" style="color: #0b2a5c; font-size: 1rem;"><i class="las la-hotel"></i> @lang('Showing') <span class="text-primary-brand fw-bold">{{ $hotels->count() }}</span> @lang('of') {{ $hotels->total() }} @lang('hotels')</h5>
+                        <h5 class="mb-0" style="color: #0b2a5c; font-size: 1rem;"><i class="las la-hotel"></i> {{ __('Showing :from-:to of :total hotels', ['from' => $hotels->firstItem() ?? 0, 'to' => $hotels->lastItem() ?? 0, 'total' => $hotels->total()]) }}</h5>
                         <div class="layout-view-controls">
                             <button class="btn btn-sm btn-outline-secondary active layout-btn" data-layout="grid" title="@lang('Grid View')">
                                 <i class="las la-th-large fs-5"></i>
@@ -76,35 +76,27 @@
                                 <div class="trip-card h-100 hotel-card-custom">
                                     <div class="trip-card__thumb">
                                         <div class="hotel-image-carousel">
-                                            @if($hotel->images->count() > 0)
-                                                @foreach($hotel->images as $img)
-                                                    <div>
-                                                        <a href="{{ route('hotel.details', [$hotel->id, slug($hotel->name)]) }}" class="w-100 h-100">
-                                                            <img src="{{ getImage(getFilePath('hotelImage') . '/' . $img->image) }}" alt="{{ __($hotel->name) }}" class="w-100" style="height: 250px; object-fit: cover;">
-                                                        </a>
-                                                    </div>
-                                                @endforeach
-                                            @else
+                                            @foreach($hotel->display_image_urls as $imageUrl)
                                                 <div>
                                                     <a href="{{ route('hotel.details', [$hotel->id, slug($hotel->name)]) }}" class="w-100 h-100">
-                                                        <img src="{{ getImage(getFilePath('hotelImage') . '/default.png') }}" alt="{{ __($hotel->name) }}" class="w-100" style="height: 250px; object-fit: cover;">
+                                                        <img src="{{ $imageUrl }}" alt="{{ $hotel->image_alt_text }}" class="w-100" style="height: 250px; object-fit: cover;">
                                                     </a>
                                                 </div>
-                                            @endif
+                                            @endforeach
                                         </div>
                                         
-                                        <div class="trip-card__price" style="z-index: 2;"><span class="fs--14px"></span> {{ showAmount($hotel->starting_price) }} {{ gs('cur_text') }}</div>
+                                        <div class="trip-card__price" style="z-index: 2;"><span class="fs--14px"></span> {{ showAmount($hotel->starting_price) }}</div>
                                     </div>
                                     <div class="trip-card__content p-4">
                                         <h5 class="trip-card__title"><a href="{{ route('hotel.details', [$hotel->id, slug($hotel->name)]) }}">{{ __($hotel->name) }}</a></h5>
                                         <ul class="trip-card__meta mt-2">
                                             <li>
                                                 <i class="las la-map-marked-alt"></i>
-                                                <p>{{ __(@$hotel->location->name) }}</p>
+                                                <p>{{ @$hotel->location->display_name }}</p>
                                             </li>
                                             <li>
                                                 <i class="las la-star text-warning"></i>
-                                                <p>{{ $hotel->star_rating }} @lang('Stars')</p>
+                                                <p>{{ hotelStarLabel($hotel->star_rating) }}</p>
                                             </li>
                                         </ul>
                                     </div>
@@ -224,11 +216,13 @@
     (function ($) {
         "use strict";
         $(document).ready(function () {
+            var isRtl = $('html').attr('dir') === 'rtl';
             $('.hotel-image-carousel').slick({
                 slidesToShow: 1,
                 slidesToScroll: 1,
                 dots: false,
                 infinite: true,
+                rtl: isRtl,
                 arrows: true,
                 prevArrow: '<button type="button" class="slick-prev"><i class="las la-angle-left"></i></button>',
                 nextArrow: '<button type="button" class="slick-next"><i class="las la-angle-right"></i></button>'
