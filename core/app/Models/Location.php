@@ -11,27 +11,11 @@ class Location extends Model
 
     public function getDisplayNameAttribute(): string
     {
-        if (app()->getLocale() != 'ar') {
-            return $this->name;
-        }
-
-        if (!empty($this->name_ar)) {
+        if (app()->getLocale() == 'ar' && !empty($this->name_ar)) {
             return $this->name_ar;
         }
 
-        $translations = [
-            'hurghada' => 'الغردقة',
-            'marsa alam' => 'مرسى علم',
-            'sharm el-sheikh' => 'شرم الشيخ',
-            'sharm el sheikh' => 'شرم الشيخ',
-        ];
-
-        $normalizedName = strtolower(trim(preg_replace('/\s+/', ' ', str_replace(['-', '_'], ' ', (string) $this->name))));
-        $normalizedNameWithHyphen = strtolower(trim(preg_replace('/\s+/', ' ', (string) $this->name)));
-
-        return $translations[$normalizedName]
-            ?? $translations[$normalizedNameWithHyphen]
-            ?? $this->name;
+        return (string) $this->name;
     }
 
     public function plans()
@@ -47,5 +31,10 @@ class Location extends Model
     public function hotels()
     {
         return $this->hasMany(Hotel::class);
+    }
+
+    public function country()
+    {
+        return $this->belongsTo(Country::class);
     }
 }

@@ -9,6 +9,7 @@ use App\Models\Location;
 use App\Models\Area;
 use App\Models\HotelSupplier;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class HotelController extends Controller
 {
@@ -22,10 +23,11 @@ class HotelController extends Controller
     public function create()
     {
         $pageTitle = 'Add New Hotel';
-        $countries = Country::where('status', 1)->orderBy('name')->get();
-        $locations = Location::where('status', 1)->orderBy('name')->get();
+        ['countries' => $countries, 'locations' => $locations, 'areas' => $areas, 'locationOptions' => $locationOptions, 'areaOptions' => $areaOptions] = $this->hotelLocationFormData();
+        $legacyLocationId = null;
+        $legacyCountryId  = null;
         $suppliers = HotelSupplier::where('status', 1)->orderBy('name')->get();
-        return view('admin.hotel.form', compact('pageTitle', 'countries', 'locations', 'suppliers'));
+        return view('admin.hotel.form', compact('pageTitle', 'countries', 'locations', 'areas', 'locationOptions', 'areaOptions', 'legacyLocationId', 'legacyCountryId', 'suppliers'));
     }
 
     public function manage($id)
@@ -34,26 +36,43 @@ class HotelController extends Controller
         $hotelName = app()->getLocale() == 'ar' && $hotel->name_ar ? $hotel->name_ar : $hotel->name;
         $pageTitle = 'Manage Hotel: ' . $hotelName;
         
-        $countries = Country::where('status', 1)->orderBy('name')->get();
-        $locations = Location::where('status', 1)->orderBy('name')->get();
-        $areas = Area::where('status', 1)->orderBy('name')->get();
+        ['countries' => $countries, 'locations' => $locations, 'areas' => $areas, 'locationOptions' => $locationOptions, 'areaOptions' => $areaOptions] = $this->hotelLocationFormData($hotel);
         $suppliers = HotelSupplier::active()->orderBy('name')->get();
+        $legacyLocationId = $this->legacyLocationIdForHotel($hotel);
+        $legacyCountryId  = $legacyLocationId ? $hotel->country_id : null;
         
         $activationErrors = $hotel->checkActivationReadiness();
         
-        return view('admin.hotel.manage', compact('pageTitle', 'hotel', 'countries', 'locations', 'areas', 'suppliers', 'activationErrors'));
+        return view('admin.hotel.manage', compact('pageTitle', 'hotel', 'countries', 'locations', 'areas', 'locationOptions', 'areaOptions', 'legacyLocationId', 'legacyCountryId', 'suppliers', 'activationErrors'));
     }
 
     public function store(Request $request, $id = 0)
     {
+        $hotel = $id ? Hotel::findOrFail($id) : null;
+        $legacyLocationId = $hotel ? $this->legacyLocationIdForHotel($hotel) : null;
+
         $request->validate([
             'name'           => 'required|string|max:255',
             'name_ar'        => 'nullable|string|max:255',
             'property_type'  => 'required|string|max:100',
             'star_rating'    => 'required|integer|min:1|max:5',
-            'country_id'     => 'required|integer|exists:countries,id',
-            'location_id'    => 'required|integer|exists:locations,id',
-            'area_id'        => 'nullable|integer|exists:areas,id',
+            'country_id'     => ['required', 'integer', Rule::exists('countries', 'id')->where(fn ($query) => $query->where('status', 1))],
+            'location_id'    => [
+                'required',
+                'integer',
+                Rule::exists('locations', 'id')->where(function ($query) use ($request, $hotel, $legacyLocationId) {
+                    $query->where('status', 1)->where(function ($query) use ($request, $hotel, $legacyLocationId) {
+                        $query->where('country_id', $request->country_id);
+
+                        if ($hotel && $legacyLocationId && (int) $request->country_id === (int) $hotel->country_id) {
+                            $query->orWhere(function ($query) use ($legacyLocationId) {
+                                $query->where('id', $legacyLocationId)->whereNull('country_id');
+                            });
+                        }
+                    });
+                }),
+            ],
+            'area_id'        => ['nullable', 'integer', Rule::exists('areas', 'id')->where(fn ($query) => $query->where('status', 1)->where('location_id', $request->location_id))],
             'address'        => 'required|string',
             'address_ar'     => 'nullable|string',
             'check_in_time'  => 'required|date_format:H:i',
@@ -68,7 +87,6 @@ class HotelController extends Controller
         ]);
         
         if ($id) {
-            $hotel          = Hotel::findOrFail($id);
             $notification   = 'Hotel basic info updated successfully';
         } else {
             $hotel          = new Hotel();
@@ -119,6 +137,71 @@ class HotelController extends Controller
         }
         
         return back()->withNotify($notify);
+    }
+
+    private function hotelLocationFormData(?Hotel $hotel = null): array
+    {
+        $countries = Country::where('status', 1)->orderBy('name')->get();
+        $this->applyDuplicateCountryLabels($countries);
+
+        $locations = Location::active()
+            ->where(function ($query) use ($hotel) {
+                $query->whereNotNull('country_id');
+
+                if ($hotel && $this->legacyLocationIdForHotel($hotel)) {
+                    $query->orWhere('id', $hotel->location_id);
+                }
+            })
+            ->orderBy('name')
+            ->get();
+        $areas     = Area::active()->orderBy('name')->get();
+
+        $locationOptions = $locations->map(fn ($location) => [
+            'id'         => (int) $location->id,
+            'country_id' => $location->country_id ? (int) $location->country_id : null,
+            'text'       => $location->display_name,
+        ])->values();
+
+        $areaOptions = $areas->map(fn ($area) => [
+            'id'          => (int) $area->id,
+            'location_id' => (int) $area->location_id,
+            'text'        => $area->display_name,
+        ])->values();
+
+        return compact('countries', 'locations', 'areas', 'locationOptions', 'areaOptions');
+    }
+
+    private function legacyLocationIdForHotel(Hotel $hotel): ?int
+    {
+        if (!$hotel->location_id) {
+            return null;
+        }
+
+        $location = Location::find($hotel->location_id);
+
+        if (!$location || $location->country_id) {
+            return null;
+        }
+
+        return (int) $location->id;
+    }
+
+    private function applyDuplicateCountryLabels($countries): void
+    {
+        $duplicateNames = $countries
+            ->groupBy(fn ($country) => strtolower(trim((string) $country->name)))
+            ->filter(fn ($items) => $items->count() > 1)
+            ->keys();
+
+        foreach ($countries as $country) {
+            $label = $country->display_name;
+
+            if ($duplicateNames->contains(strtolower(trim((string) $country->name)))) {
+                $label .= ' (ID ' . $country->id . ')';
+            }
+
+            $country->setAttribute('admin_dropdown_name', $label);
+        }
     }
 
     public function status($id)

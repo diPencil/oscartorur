@@ -5,6 +5,11 @@
             <div class="card">
                 <form action="{{ route('admin.hotel.store', @$hotel->id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
+                    @php
+                        $selectedCountryId = old('country_id', @$hotel->country_id);
+                        $selectedLocationId = old('location_id', @$hotel->location_id);
+                        $selectedAreaId = old('area_id', @$hotel->area_id);
+                    @endphp
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6 form-group">
@@ -56,7 +61,7 @@
                                 <select name="country_id" class="form-control" required id="country">
                                     <option value="">@lang('Select Country')</option>
                                     @foreach ($countries as $country)
-                                        <option value="{{ $country->id }}" @selected(old('country_id', @$hotel->country_id) == $country->id)>{{ __($country->name) }}</option>
+                                        <option value="{{ $country->id }}" @selected($selectedCountryId == $country->id)>{{ $country->admin_dropdown_name ?? $country->display_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -64,8 +69,17 @@
                                 <label>@lang('Location') <span class="text-danger">*</span></label>
                                 <select name="location_id" class="form-control" required id="location">
                                     <option value="">@lang('Select Location')</option>
-                                    @foreach ($locations as $location)
-                                        <option value="{{ $location->id }}" @selected(old('location_id', @$hotel->location_id) == $location->id)>{{ __($location->name) }}</option>
+                                    @foreach ($locations->filter(fn ($location) => filled($selectedCountryId) && (string) $location->country_id === (string) $selectedCountryId) as $location)
+                                        <option value="{{ $location->id }}" @selected($selectedLocationId == $location->id)>{{ $location->display_name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>@lang('Area (Optional)')</label>
+                                <select name="area_id" class="form-control" id="area">
+                                    <option value="">@lang('Select Area')</option>
+                                    @foreach ($areas->where('location_id', $selectedLocationId) as $area)
+                                        <option value="{{ $area->id }}" @selected($selectedAreaId == $area->id)>{{ $area->display_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -157,23 +171,14 @@
 @endpush
 
 @push('script')
-<script>
-    (function ($) {
-        "use strict";
-        
-        // Simple chained dropdowns for Country -> City -> Area
-        // NOTE: You would normally load these via AJAX in a real implementation.
-        // For now, this is a skeleton structure.
-        $('#country').on('change', function() {
-            // Load locations for country
-            // $('#location').html('...');
-        });
-        
-        $('#location').on('change', function() {
-            // Load areas for location
-            // $('#area').html('...');
-        });
-        
-    })(jQuery);
-</script>
+    @include('admin.hotel.partials.location-dropdown-script', [
+        'countrySelect' => '#country',
+        'locationSelect' => '#location',
+        'areaSelect' => '#area',
+        'selectedCountryId' => $selectedCountryId,
+        'selectedLocationId' => $selectedLocationId,
+        'selectedAreaId' => $selectedAreaId,
+        'legacyLocationId' => $legacyLocationId,
+        'legacyCountryId' => $legacyCountryId,
+    ])
 @endpush

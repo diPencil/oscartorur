@@ -1,5 +1,10 @@
 <form action="{{ route('admin.hotel.store', $hotel->id) }}" method="POST">
     @csrf
+    @php
+        $selectedCountryId = old('country_id', $hotel->country_id);
+        $selectedLocationId = old('location_id', $hotel->location_id);
+        $selectedAreaId = old('area_id', $hotel->area_id);
+    @endphp
     
     <div class="row">
         <div class="col-12 mb-4">
@@ -82,30 +87,28 @@
         <div class="col-md-4 form-group">
             <label>@lang('Country')</label>
             <select name="country_id" class="form-control" required id="edit_country">
-                <option value="" selected disabled>@lang('Select Country')</option>
+                <option value="">@lang('Select Country')</option>
                 @foreach ($countries as $country)
-                    <option value="{{ $country->id }}" @selected(old('country_id', $hotel->country_id) == $country->id)>{{ __($country->name) }}</option>
+                    <option value="{{ $country->id }}" @selected($selectedCountryId == $country->id)>{{ $country->admin_dropdown_name ?? $country->display_name }}</option>
                 @endforeach
             </select>
         </div>
         <div class="col-md-4 form-group">
             <label>@lang('City/Location')</label>
             <select name="location_id" class="form-control" required id="edit_location">
-                <option value="" selected disabled>@lang('Select City')</option>
-                @foreach (\App\Models\Location::where('country_id', $hotel->country_id)->get() as $loc)
-                    <option value="{{ $loc->id }}" @selected($hotel->location_id == $loc->id)>{{ $loc->name }}</option>
+                <option value="">@lang('Select City')</option>
+                @foreach ($locations->filter(fn ($loc) => filled($selectedCountryId) && ((string) $loc->country_id === (string) $selectedCountryId || (blank($loc->country_id) && (int) $loc->id === (int) $legacyLocationId && (string) $selectedCountryId === (string) $legacyCountryId))) as $loc)
+                    <option value="{{ $loc->id }}" @selected($selectedLocationId == $loc->id)>{{ $loc->display_name }}</option>
                 @endforeach
             </select>
         </div>
         <div class="col-md-4 form-group">
             <label>@lang('Area (Optional)')</label>
             <select name="area_id" class="form-control" id="edit_area">
-                <option value="" selected disabled>@lang('Select Area')</option>
-                @if($hotel->location_id)
-                    @foreach (\App\Models\Area::where('location_id', $hotel->location_id)->get() as $ar)
-                        <option value="{{ $ar->id }}" @selected($hotel->area_id == $ar->id)>{{ $ar->name }}</option>
-                    @endforeach
-                @endif
+                <option value="">@lang('Select Area')</option>
+                @foreach ($areas->where('location_id', $selectedLocationId) as $area)
+                    <option value="{{ $area->id }}" @selected($selectedAreaId == $area->id)>{{ $area->display_name }}</option>
+                @endforeach
             </select>
         </div>
         
@@ -180,3 +183,16 @@
         <button type="submit" class="btn btn--primary h-45">@lang('Save Changes') <i class="las la-save"></i></button>
     </div>
 </form>
+
+@push('script')
+    @include('admin.hotel.partials.location-dropdown-script', [
+        'countrySelect' => '#edit_country',
+        'locationSelect' => '#edit_location',
+        'areaSelect' => '#edit_area',
+        'selectedCountryId' => $selectedCountryId,
+        'selectedLocationId' => $selectedLocationId,
+        'selectedAreaId' => $selectedAreaId,
+        'legacyLocationId' => $legacyLocationId,
+        'legacyCountryId' => $legacyCountryId,
+    ])
+@endpush
