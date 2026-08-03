@@ -307,7 +307,7 @@ class SiteController extends Controller {
 
         $request = request();
 
-        $seminars = Seminar::active()->searchable(['name', 'price', 'capacity', 'duration', 'category:name', 'location:name'])->filter(['category_id', 'location_id']);
+        $seminars = Seminar::publiclyAvailable()->searchable(['name', 'price', 'capacity', 'duration', 'category:name', 'location:name'])->filter(['category_id', 'location_id']);
 
         if ($request->from_date) {
             $from_date = Carbon::parse($request->from_date);
@@ -317,7 +317,9 @@ class SiteController extends Controller {
         }
 
         if ($from_date) {
-            $seminars = $seminars->where('start_time', '>=', $from_date);
+            $seminars = $seminars->where(function ($query) use ($from_date) {
+                $query->where('is_year_round', true)->orWhere('start_time', '>=', $from_date);
+            });
         }
 
         if ($to_date) {
@@ -329,7 +331,9 @@ class SiteController extends Controller {
                 $notify[] = ['error', 'Must be grater than from date'];
                 return back()->withNotify($notify);
             }
-            $seminars = $seminars->where('start_time', '<=', $to_date);
+            $seminars = $seminars->where(function ($query) use ($to_date) {
+                $query->where('is_year_round', true)->orWhere('start_time', '<=', $to_date);
+            });
         }
 
         if ($request->min_price) {
@@ -343,18 +347,18 @@ class SiteController extends Controller {
         $seminars = $seminars->orderBy('id', 'DESC')->paginate(getPaginate());
 
         $categories = Category::active()->whereHas('seminars', function ($q) {
-            $q->active();
+            $q->publiclyAvailable();
         })->orderBy('name')->get();
         $locations = Location::active()->whereHas('seminars', function ($q) {
-            $q->active();
+            $q->publiclyAvailable();
         })->orderBy('name')->get();
 
         return view('Template::seminar.index', compact('seminars', 'pageTitle', 'categories', 'locations'));
     }
 
     public function seminarDetails($id, $slug) {
-        $seminar            = Seminar::active()->where('id', $id)->with('ratings')->withAvg('ratings', 'rating')->withCount('ratings')->firstOrFail();
-        $pageTitle          = $seminar->name;
+        $seminar            = Seminar::publiclyAvailable()->where('id', $id)->with('ratings')->withAvg('ratings', 'rating')->withCount('ratings')->firstOrFail();
+        $pageTitle          = $seminar->display_name;
         $seminar_breadcrumb = getContent('seminar_breadcrumb.content', true);
         $seoContents        = $seminar->seo_content;
         $seoImage           = @$seoContents->image ? frontendImage('seminar', $seoContents->image, getFileSize('seo'), true) : null;

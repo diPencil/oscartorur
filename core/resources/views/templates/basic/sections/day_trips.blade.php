@@ -1,6 +1,6 @@
 @php
     $seminarsContent = getContent('seminars.content', true);
-    $seminars = \App\Models\Seminar::active()->withCount('ratings')->latest()->take(10)->get();
+    $seminars = \App\Models\Seminar::publiclyAvailable()->withCount('ratings')->latest()->take(10)->get();
 @endphp
 
 <section class="pt-100 pb-100 bg_img location-section white--overlay" style="background-image: url({{ frontendImage('seminars', @$seminarsContent->data_values->background_image, '1920x1280') }});">
@@ -14,16 +14,16 @@
                 </div>
             </div>
             <div class="col-xxl-7 col-xl-9 ps-5">
-                <div class="location-slider">
+                <div class="location-slider day-trip-slider">
                     @forelse ($seminars as $seminar)
                         <div class="single-slide">
                             <div class="location-card has--link rounded-3">
-                                <a class="item--link" href="{{ route('seminar.details', [$seminar->id, slug($seminar->name)]) }}"></a>
-                                <img src="{{ getImage(getFilePath('seminar') . '/' . @$seminar->images[0], getFileSize('seminar')) }}" alt="image">
+                                <a class="item--link" href="{{ route('seminar.details', [$seminar->id, slug($seminar->display_name)]) }}"></a>
+                                <img src="{{ $seminar->display_image_url }}" alt="{{ $seminar->display_name }}">
                                 <div class="overlay-content">
                                     <div class="d-flex flex-wrap align-items-end">
                                         <div class="col-6">
-                                            <h4 class="location-name text-white">{{ __($seminar->name) }}</h4>
+                                            <h4 class="location-name text-white">{{ $seminar->display_name }}</h4>
                                             <div class="ratings fs--14px mt-2">
                                                 @php
                                                     $rating = $seminar->ratings()->avg('rating') + 0;
@@ -36,7 +36,14 @@
                                         </div>
                                         <div class="col-6 text-end">
                                             <div class="location-card__price text-white">{{ showAmount($seminar->price) }}</div>
-                                            <span class="text-white fs--14px"><i class="las la-clock fs--18px"></i> {{ __($seminar->duration) }} @lang('Days')</span>
+                                            <span class="text-white fs--14px">
+                                                <i class="las la-clock fs--18px"></i>
+                                                @if ($seminar->is_year_round)
+                                                    @lang('Available all year')
+                                                @else
+                                                    {{ __($seminar->duration) }} @lang('Days')
+                                                @endif
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -50,3 +57,50 @@
         </div>
     </div>
 </section>
+
+@push('script')
+    <script>
+        (function($) {
+            "use strict";
+
+            const isRtl = document.documentElement.dir === 'rtl';
+            const slider = $('.day-trip-slider');
+
+            if (slider.length) {
+                if (slider.hasClass('slick-initialized')) {
+                    slider.slick('unslick');
+                }
+
+                slider.slick({
+                    slidesToShow: 3,
+                    slidesToScroll: 1,
+                    dots: false,
+                    infinite: true,
+                    arrows: true,
+                    rtl: isRtl,
+                    prevArrow: '<div class="prev"><i class="las ' + (isRtl ? 'la-angle-right' : 'la-angle-left') + '"></i></div>',
+                    nextArrow: '<div class="next"><i class="las ' + (isRtl ? 'la-angle-left' : 'la-angle-right') + '"></i></div>',
+                    responsive: [{
+                            breakpoint: 992,
+                            settings: {
+                                slidesToShow: 3,
+                            },
+                        },
+                        {
+                            breakpoint: 768,
+                            settings: {
+                                slidesToShow: 2,
+                            },
+                        },
+                        {
+                            breakpoint: 520,
+                            settings: {
+                                slidesToShow: 1,
+                            },
+                        },
+                    ],
+                });
+            }
+        })(jQuery);
+    </script>
+@endpush

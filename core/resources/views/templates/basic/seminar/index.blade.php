@@ -37,10 +37,10 @@
                                             <div class="left">
                                                 <input class="form-check-input" id="chekbox-{{ $category->id }}" name="category_id[]" type="checkbox" value="{{ $category->id }}" @if (in_array($category->id, $selectedCategories)) checked @endif>
                                                 <label class="form-check-label" for="chekbox-{{ $category->id }}">
-                                                    {{ __($category->name) }}
+                                                    {{ app()->getLocale() == 'ar' && !empty($category->name_ar) ? $category->name_ar : $category->name }}
                                                 </label>
                                             </div>
-                                            <label class="fs--14px mt-1" for="chekbox-{{ $category->id }}">({{ $category->seminars()->count() }})</label>
+                                            <label class="fs--14px mt-1" for="chekbox-{{ $category->id }}">({{ $category->seminars()->publiclyAvailable()->count() }})</label>
                                         </div><!-- form-check end -->
                                     @endforeach
                                 </div>
@@ -52,10 +52,10 @@
                                             <div class="left">
                                                 <input class="form-check-input" id="chekbox-{{ $location->id }}" name="location_id[]" type="checkbox" value="{{ $location->id }}" @if (in_array($location->id, $selectedLocations)) checked @endif>
                                                 <label class="form-check-label" for="chekbox-{{ $location->id }}">
-                                                    {{ __($location->name) }}
+                                                    {{ $location->display_name }}
                                                 </label>
                                             </div>
-                                            <label class="fs--14px mt-1" for="chekbox-{{ $location->id }}">({{ $location->seminars()->count() }})</label>
+                                            <label class="fs--14px mt-1" for="chekbox-{{ $location->id }}">({{ $location->seminars()->publiclyAvailable()->count() }})</label>
                                         </div><!-- form-check end -->
                                     @endforeach
                                     <div class="col-12 mt-3">
@@ -95,21 +95,21 @@
                             <div class="card-column col-xl-4 col-sm-6">
                                 <div class="trip-card">
                                     <div class="trip-card__thumb">
-                                        <a class="w-100 h-100" href="{{ route('seminar.details', [$seminar->id, slug($seminar->name)]) }}">
-                                            <img src="{{ getImage(getFilePath('seminar') . '/' . @$seminar->images[0], getFileSize('seminar')) }}" alt="image">
+                                        <a class="w-100 h-100" href="{{ route('seminar.details', [$seminar->id, slug($seminar->display_name)]) }}">
+                                            <img src="{{ $seminar->display_image_url }}" alt="{{ $seminar->display_name }}">
                                         </a>
                                         <div class="trip-card__price"> {{ showAmount($seminar->price) }}</div>
                                     </div>
                                     <div class="trip-card__content">
-                                        <h5 class="trip-card__title"><a href="{{ route('seminar.details', [$seminar->id, slug($seminar->name)]) }}">@lang($seminar->name)</a></h5>
+                                        <h5 class="trip-card__title"><a href="{{ route('seminar.details', [$seminar->id, slug($seminar->display_name)]) }}">{{ $seminar->display_name }}</a></h5>
                                         <ul class="trip-card__meta mt-2">
                                             <li>
                                                 <i class="las la-map-marked-alt"></i>
-                                                <p>{{ __(@$seminar->location->name) }}</p>
+                                                <p>{{ @$seminar->location->display_name }}</p>
                                             </li>
                                             <li>
                                                 <i class="las la-clock"></i>
-                                                <p>{{ showDateTime(@$seminar->start_time) }}</p>
+                                                <p>{{ $seminar->availability_label }}</p>
                                             </li>
                                             <li>
                                                 <i class="las la-user"></i>

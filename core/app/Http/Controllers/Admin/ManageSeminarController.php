@@ -33,6 +33,7 @@ class ManageSeminarController extends Controller
     public function store(Request $request, $id = 0)
     {
         $isRequired = $id ? 'nullable' : 'required';
+        $isYearRound = $request->boolean('is_year_round');
 
         $request->validate([
             'name'        => 'required|string',
@@ -48,8 +49,9 @@ class ManageSeminarController extends Controller
             'map_latitude'       => 'required|string',
             'map_longitude'      => 'required|string',
             'duration'           => 'required',
-            'start_time'         => 'required|date_format:"Y-m-d H:i"|after_or_equal:today',
-            'end_time'           => 'required|date_format:"Y-m-d H:i"|after_or_equal:start_time',
+            'is_year_round'      => 'nullable|boolean',
+            'start_time'         => [$isYearRound ? 'nullable' : 'required', 'date_format:Y-m-d H:i', 'after_or_equal:today'],
+            'end_time'           => [$isYearRound ? 'nullable' : 'required', 'date_format:Y-m-d H:i', 'after_or_equal:start_time'],
             'capacity'           => 'required|integer|gt:0',
             'price'              => 'required|numeric|gt:0',
             'details'            => 'required|string',
@@ -89,8 +91,13 @@ class ManageSeminarController extends Controller
         $seminar->map_latitude  = $request->map_latitude;
         $seminar->map_longitude = $request->map_longitude;
         $seminar->duration      = $request->duration;
-        $seminar->start_time    = Carbon::parse($request->start_time);
-        $seminar->end_time      = Carbon::parse($request->end_time);
+        $seminar->is_year_round = $isYearRound;
+        if (!$isYearRound || $request->filled('start_time')) {
+            $seminar->start_time = $request->filled('start_time') ? Carbon::parse($request->start_time) : null;
+        }
+        if (!$isYearRound || $request->filled('end_time')) {
+            $seminar->end_time = $request->filled('end_time') ? Carbon::parse($request->end_time) : null;
+        }
         $seminar->capacity      = $request->capacity;
         $seminar->details       = $request->details;
         $seminar->details_ar    = $request->details_ar;
@@ -146,10 +153,12 @@ class ManageSeminarController extends Controller
 
     protected function removeImages($request, $seminar, $path)
     {
-        $previousImages = $seminar->images;
-        $imagesToRemove  = array_values(array_diff($previousImages, $request->old ?? []));
+        $previousImages = $seminar->images ?? [];
+        $imagesToRemove = array_values(array_diff($previousImages, $request->old ?? []));
         foreach ($imagesToRemove as $item) {
-            fileManager()->removeFile($path . '/' . $item);
+            if (!filter_var($item, FILTER_VALIDATE_URL)) {
+                fileManager()->removeFile($path . '/' . $item);
+            }
         }      
         $images = array_filter($previousImages, function($image) use($imagesToRemove) {
             return !in_array($image, $imagesToRemove);
@@ -162,15 +171,15 @@ class ManageSeminarController extends Controller
     public function edit($id)
     {
         $plan = Seminar::findOrFail($id);
-        $plan->start_time = Carbon::parse($plan->start_time)->format('Y-m-d H:i');
-        $plan->end_time = Carbon::parse($plan->end_time)->format('Y-m-d H:i');
+        $plan->start_time = $plan->start_time ? Carbon::parse($plan->start_time)->format('Y-m-d H:i') : null;
+        $plan->end_time = $plan->end_time ? Carbon::parse($plan->end_time)->format('Y-m-d H:i') : null;
         $pageTitle = 'Edit Seminar';
         $categories = Category::active()->orderBy('name')->get();
         $locations = Location::active()->orderBy('name')->get();
         $images = [];
-        foreach ($plan->images as $key => $image) {
+        foreach ($plan->images ?? [] as $key => $image) {
             $img['id']  = $image;
-            $img['src'] = getImage(getFilePath('seminar') . '/' . $image);
+            $img['src'] = $plan->imageUrl($image);
             $images[]   = $img;
         }
         return view('admin.seminar.form', compact('pageTitle', 'categories', 'locations', 'plan', 'images'));

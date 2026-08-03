@@ -23,11 +23,17 @@
                             <tbody>
                                 @forelse ($seminars as $item)
                                     <tr>
-                                        <td>{{ __($item->name) }}</td>
-                                        <td>{{ __($item->category->name) }}</td>
-                                        <td>{{ __($item->location->name) }}</td>
+                                        <td>{{ $item->display_name }}</td>
+                                        <td>{{ app()->getLocale() == 'ar' && !empty($item->category->name_ar) ? $item->category->name_ar : $item->category->name }}</td>
+                                        <td>{{ $item->location->display_name }}</td>
                                         <td>{{ $item->duration }} @lang('Days')</td>
-                                        <td> <span class="text--primary">{{ showDateTime($item->start_time) }}</span> <br>-<br> <span class="text--warning">{{ showDateTime($item->end_time) }}</span></td>
+                                        <td>
+                                            @if ($item->is_year_round)
+                                                <span class="badge badge--info">@lang('Year-round')</span>
+                                            @else
+                                                <span class="text--primary">{{ showDateTime($item->start_time) }}</span> <br>-<br> <span class="text--warning">{{ showDateTime($item->end_time) }}</span>
+                                            @endif
+                                        </td>
 
                                         <td>{{ $item->capacity }}</td>
                                         <td>{{ $item->sold }}</td>

@@ -5,6 +5,9 @@
             <div class="card">
                 <form class="disableSubmission" action="{{ route('admin.seminar.store', @$plan->id) }}" method="post" enctype="multipart/form-data">
                     @csrf
+                    @php
+                        $isYearRound = (bool) old('is_year_round', @$plan->is_year_round ?? false);
+                    @endphp
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-4">
@@ -39,7 +42,7 @@
                                     <select class="form-control select2" name="category_id" required>
                                         <option value="" selected disabled>@lang('Select One')</option>
                                         @foreach (@$categories as $item)
-                                            <option value="{{ $item->id }}">{{ __($item->name) }}</option>
+                                            <option value="{{ $item->id }}">{{ app()->getLocale() == 'ar' && !empty($item->name_ar) ? $item->name_ar : $item->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -50,7 +53,7 @@
                                     <select class="form-control select2" name="location_id" required>
                                         <option value="" selected disabled>@lang('Select One')</option>
                                         @foreach (@$locations as $item)
-                                            <option value="{{ $item->id }}">{{ __($item->name) }}</option>
+                                            <option value="{{ $item->id }}">{{ $item->display_name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -78,14 +81,25 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
+                                    <label>@lang('Availability')</label>
+                                    <input name="is_year_round" type="hidden" value="0">
+                                    <div class="form-check form-switch form--switch">
+                                        <input class="form-check-input" id="isYearRound" name="is_year_round" type="checkbox" value="1" @checked($isYearRound)>
+                                        <label class="form-check-label" for="isYearRound">@lang('Available All Year')</label>
+                                    </div>
+                                    <small class="text-muted">@lang('Enable this option if the trip operates throughout the year without a fixed expiry date.')</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
                                     <label>@lang('Start Time')</label>
-                                    <input class="form-control timepicker" name="start_time" type="text" value="{{ old('start_time', @$plan->start_time) }}" autocomplete="off" required>
+                                    <input class="form-control timepicker fixed-availability-date" name="start_time" type="text" value="{{ old('start_time', @$plan->start_time) }}" autocomplete="off" {{ $isYearRound ? 'disabled' : 'required' }}>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label>@lang('End Time')</label>
-                                    <input class="form-control timepicker" name="end_time" type="text" value="{{ old('end_time', @$plan->end_time) }}" autocomplete="off" required>
+                                    <input class="form-control timepicker fixed-availability-date" name="end_time" type="text" value="{{ old('end_time', @$plan->end_time) }}" autocomplete="off" {{ $isYearRound ? 'disabled' : 'required' }}>
                                 </div>
                             </div>
 
@@ -419,8 +433,21 @@
                 label: 'Drag & Drop files here or click to browse'
             });
 
-            $('select[name=category_id]').val('{{ old('category_id', @$plan->category_id) }}').select2();
-            $('select[name=location_id]').val('{{ old('location_id', @$plan->location_id) }}').select2();
+            const isRtl = document.documentElement.dir === 'rtl';
+            $('select[name=category_id]').val('{{ old('category_id', @$plan->category_id) }}').select2({
+                dir: isRtl ? 'rtl' : 'ltr'
+            });
+            $('select[name=location_id]').val('{{ old('location_id', @$plan->location_id) }}').select2({
+                dir: isRtl ? 'rtl' : 'ltr'
+            });
+
+            function toggleYearRoundDates() {
+                const yearRoundEnabled = $('#isYearRound').is(':checked');
+                $('.fixed-availability-date').prop('disabled', yearRoundEnabled).prop('required', !yearRoundEnabled);
+            }
+
+            $('#isYearRound').on('change', toggleYearRoundDates);
+            toggleYearRoundDates();
 
 
 

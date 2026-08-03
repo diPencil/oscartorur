@@ -42,25 +42,25 @@
                     </ul>
                     <div class="tab-content mt-5 package-tab-content" id="myTabContent">
                         <div class="tab-pane fade show active" id="details" role="tabpanel" aria-labelledby="details-tab">
-                            <a href="{{ getImage(getFilePath('seminar') . '/' . @$seminar->images[0]) }}" data-rel="lightcase">
-                                <img class="w-100 mb-4 tour-plan-img" src="{{ getImage(getFilePath('seminar') . '/' . @$seminar->images[0], getFileSize('seminar')) }}" alt="image">
+                            <a href="{{ $seminar->imageUrl(@$seminar->images[0]) }}" data-rel="lightcase">
+                                <img class="w-100 mb-4 tour-plan-img" src="{{ $seminar->display_image_url }}" alt="{{ $seminar->display_name }}">
                             </a>
                             <h3 class="mb-3">@lang('Seminar Details')</h3>
                             <p>
                                 @php
-                                    echo $seminar->details;
+                                    echo $seminar->display_details;
                                 @endphp
                             </p>
                             <h4 class="action-widget__title no-icon mb-3 mt-5">@lang('Included')</h4>
                             <ul class="cmn-list">
-                                @foreach ($seminar->included ?? [] as $incld)
+                                @foreach ($seminar->display_included ?? [] as $incld)
                                     <li>@lang($incld)</li>
                                 @endforeach
                             </ul>
 
                             <h4 class="action-widget__title no-icon mb-3 mt-5">@lang('Excluded')</h4>
                             <ul class="cmn-list cmn-list-excluded">
-                                @foreach ($seminar->excluded ?? [] as $excld)
+                                @foreach ($seminar->display_excluded ?? [] as $excld)
                                     <li>@lang($excld)</li>
                                 @endforeach
                             </ul>
@@ -74,8 +74,8 @@
                                 @forelse (@$seminar->images ?? [] as $image)
                                     <div class="col-lg-4">
                                         <div class="gallery-card">
-                                            <img src=" {{ getImage(getFilePath('seminar') . '/' . @$image, getFileSize('seminar')) }}" alt="image">
-                                            <a class="view-thumb" data-rel="lightcase:myCollection:slideshow" href="{{ getImage(getFilePath('seminar') . '/' . @$image) }}"><i class="las la-plus"></i></a>
+                                            <img src="{{ $seminar->imageUrl($image, getFileSize('seminar')) }}" alt="{{ $seminar->display_name }}">
+                                            <a class="view-thumb" data-rel="lightcase:myCollection:slideshow" href="{{ $seminar->imageUrl($image) }}"><i class="las la-plus"></i></a>
                                         </div>
                                     </div>
                                 @empty
@@ -85,7 +85,7 @@
                         </div>
                         <div class="tab-pane fade" id="plan" role="tabpanel" aria-labelledby="plan-tab">
 
-                            @foreach (@$seminar->seminar_plan ?? [] as $item)
+                            @foreach (@$seminar->display_seminar_plan ?? [] as $item)
                                 <div class="tour-plan-block">
                                     <div class="tour-plan-block__header">
                                         <h3 class="title mb-3"><span>{{ __($item->title) }}</span> {{ __($item->subtitle) }}</h3>
@@ -182,8 +182,8 @@
                 <div class="col-lg-4">
                     <div class="package-sidebar-widget">
                         <div class="thumb">
-                            <a href="{{ getImage(getFilePath('seminar') . '/' . @$seminar->images[0]) }}" data-rel="lightcase">
-                                <img src="{{ getImage(getFilePath('seminar') . '/' . @$seminar->images[0], getFileSize('seminar')) }}" alt="image">
+                            <a href="{{ $seminar->imageUrl(@$seminar->images[0]) }}" data-rel="lightcase">
+                                <img src="{{ $seminar->display_image_url }}" alt="{{ $seminar->display_name }}">
                             </a>
                             <div class="price">{{ showAmount($seminar->price) }}</div>
                         </div>
@@ -191,12 +191,20 @@
                             <ul class="package-sidebar-list">
                                 <li>
                                     <i class="las la-clock"></i>
-                                    <span>{{ $seminar->duration }} @lang('Days')</span>
+                                    <span>
+                                        @if ($seminar->is_year_round)
+                                            @lang('Available all year')
+                                        @else
+                                            {{ $seminar->duration }} @lang('Days')
+                                        @endif
+                                    </span>
                                 </li>
-                                <li>
-                                    <i class="las la-calendar-alt"></i>
-                                    <span>{{ showDateTime($seminar->start_time, 'd, F, Y') }}</span>
-                                </li>
+                                @unless ($seminar->is_year_round)
+                                    <li>
+                                        <i class="las la-calendar-alt"></i>
+                                        <span>{{ showDateTime($seminar->start_time, 'd, F, Y') }}</span>
+                                    </li>
+                                @endunless
                                 <li>
                                     <i class="las la-couch"></i>
                                     <span>{{ $seminar->capacity - $seminar->sold }} @lang('Availability')</span>
@@ -205,11 +213,11 @@
                             <ul class="caption-list mt-5">
                                 <li>
                                     <span class="caption text-white">@lang('Start Time')</span>
-                                    <span class="value text-end text--base">{{ showDateTime($seminar->start_time) }}</span>
+                                    <span class="value text-end text--base">{{ $seminar->is_year_round ? trans('Available all year') : showDateTime($seminar->start_time) }}</span>
                                 </li>
                                 <li>
                                     <span class="caption text-white">@lang('Return')</span>
-                                    <span class="value text-end text--base">{{ showDateTime($seminar->end_time) }}</span>
+                                    <span class="value text-end text--base">{{ $seminar->is_year_round ? trans('Available all year') : showDateTime($seminar->end_time) }}</span>
                                 </li>
                                 <li>
                                     <span class="caption text-white">@lang('Total Capacity')</span>
@@ -217,7 +225,7 @@
                                 </li>
                             </ul>
 
-                            @if ($seminar->start_time < now())
+                            @if ($seminar->has_booking_window_closed)
                                 <button class="btn btn--base w-100 mt-5" type="button">@lang('Completed')</button>
                             @else
                                 @if ($seminar->sold >= $seminar->capacity)
@@ -236,13 +244,13 @@
                             @endif
                         </div>
                         @php
-                            $route = route('seminar.details', [$seminar->id, slug($seminar->name)]);
+                            $route = route('seminar.details', [$seminar->id, slug($seminar->display_name)]);
                         @endphp
                         <div class="blog-details-footer mt-4">
                             <span class="share-caption text-white">@lang('Share Seminar')</span>
                             <ul class="share-post-links">
                                 <li><a class="twitter" href="http://twitter.com/share?url={{ urlencode($route) }}" target="_blank"><i class="lab la-twitter m-0"></i> </a></li>
-                                <li><a class="linkedin" href="http://www.linkedin.com/shareArticle?mini=true&amp;url={{ urlencode($route) }}&amp;title={{ $seminar->name }}&amp;{{ $seminar->name }}" target="_blank"><i class="lab la-linkedin-in m-0"></i> </a></li>
+                                <li><a class="linkedin" href="http://www.linkedin.com/shareArticle?mini=true&amp;url={{ urlencode($route) }}&amp;title={{ $seminar->display_name }}&amp;{{ $seminar->display_name }}" target="_blank"><i class="lab la-linkedin-in m-0"></i> </a></li>
                                 <li><a class="facebook" href="http://www.facebook.com/sharer.php?u={{ urlencode($route) }}" target="_blank"><i class="lab la-facebook-f m-0"></i></a></li>
                                 <li><a class="instagram" href="https://www.instagram.com/share?u={{ urlencode($route) }}" target="_blank"><i class="lab la-facebook-f m-0"></i></a></li>
                             </ul>
@@ -255,7 +263,7 @@
     <!-- single package section end -->
 
     <!-- Modal -->
-    @if (auth()->check() && $seminar->start_time > now() && $seminar->sold <= $seminar->capacity)
+    @if (auth()->check() && !$seminar->has_booking_window_closed && $seminar->sold <= $seminar->capacity)
         <div class="modal fade" id="bookingModal" aria-labelledby="exampleModalLabel" aria-hidden="true" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content">
