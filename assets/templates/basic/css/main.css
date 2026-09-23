@@ -3198,8 +3198,7 @@ label {
 .location-section {
   position: relative;
   z-index: 1;
-  background-position-y: top;
-  background-position-x: -300px;
+  background-position: center top;
 }
 
 .location-card {
