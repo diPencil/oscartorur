@@ -359,10 +359,10 @@ class SiteController extends Controller {
     public function seminarDetails($id, $slug) {
         $seminar            = Seminar::publiclyAvailable()->where('id', $id)->with('ratings')->withAvg('ratings', 'rating')->withCount('ratings')->firstOrFail();
         $pageTitle          = $seminar->display_name;
-        $seminar_breadcrumb = getContent('seminar_breadcrumb.content', true);
+        $seminar_breadcrumb = getContent('day_trip_breadcrumb.content', true);
         $seoContents        = $seminar->seo_content;
         $seoImage           = @$seoContents->image ? frontendImage('seminar', $seoContents->image, getFileSize('seo'), true) : null;
-        $breadcrumb         = getContent('seminar_breadcrumb.content', true);
+        $breadcrumb         = getContent('day_trip_breadcrumb.content', true);
         return view('Template::seminar.details', compact('seminar', 'pageTitle', 'seoContents', 'seoImage', 'breadcrumb'));
     }
 }

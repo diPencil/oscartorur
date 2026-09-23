@@ -39,6 +39,11 @@
                 @foreach (@$counterElements as $counter)
                     <div class="col-sm-3 col-6 overview-single">
                         <div class="overview-item">
+                            @if (@$counter->data_values->image)
+                                <div class="overview-item__icon mb-2">
+                                    <img src="{{ frontendImage('counter', @$counter->data_values->image, '100x100') }}" alt="{{ __(@$counter->data_values->title) }}" class="img-fluid" style="max-width:60px;">
+                                </div>
+                            @endif
                             <h4 class="overview-item__number">{{ __(@$counter->data_values->counter_digit) }}</h4>
                             <p class="overview-item__caption mt-3">{{ __(@$counter->data_values->title) }}</p>
                         </div>

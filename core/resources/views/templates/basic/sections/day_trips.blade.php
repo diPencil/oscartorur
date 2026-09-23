@@ -1,9 +1,9 @@
 @php
-    $seminarsContent = getContent('seminars.content', true);
+    $seminarsContent = getContent('day_trips.content', true);
     $seminars = \App\Models\Seminar::publiclyAvailable()->withCount('ratings')->latest()->take(10)->get();
 @endphp
 
-<section class="pt-100 pb-100 bg_img location-section white--overlay" style="background-image: url({{ frontendImage('seminars', @$seminarsContent->data_values->background_image, '1920x1280') }});">
+<section class="pt-100 pb-100 bg_img location-section white--overlay" style="background-image: url({{ frontendImage('day_trips', @$seminarsContent->data_values->background_image, '1920x1280') }});">
     <div class="container-fluid">
         <div class="row justify-content-xl-end justify-content-center">
             <div class="col-xl-3 col-lg-6 col-md-8 wow fadeInUp" data-wow-duration="0.5s" data-wow-delay="0.3s">

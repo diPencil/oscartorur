@@ -2,7 +2,7 @@
 @section('content')
     <!-- single package section start -->
     <section class="pb-100">
-        <div class="single-package-header bg_img" style="background-image: url('{{ frontendImage('seminar_breadcrumb', @$breadcrumb->data_values->image, '1920x1186') }}');">
+        <div class="single-package-header bg_img" style="background-image: url('{{ frontendImage('day_trip_breadcrumb', @$breadcrumb->data_values->image, '1920x1186') }}');">
             <div class="container">
                 <div class="row">
                     <div class="col-lg-8">

@@ -74,6 +74,11 @@
         "no_selection": true,
         "name": "Counter Section",
         "element": {
+            "images": {
+                "image": {
+                    "size": "100x100"
+                }
+            },
             "title": "text",
             "counter_digit": "text",
             "modal": true
