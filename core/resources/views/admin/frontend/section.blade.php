@@ -302,7 +302,7 @@
                                             <div class="form-group">
                                                 <label>{{ __(keyToTitle(@$imgKey)) }}</label>
 
-                                                <x-image-uploader class="w-100" name="image_input[{{ @$imgKey }}]" :imagePath="getImage('',@$section->content->images->$imgKey->size)" id="addImage{{ $loop->index }}" :size="$section->element->images->$imgKey->size" />
+                                                <x-image-uploader class="w-100" name="image_input[{{ @$imgKey }}]" :imagePath="getImage('',@$section->element->images->$imgKey->size)" id="addImage{{ $loop->index }}" :size="$section->element->images->$imgKey->size" />
                                             </div>
                                         @endforeach
                                     @elseif($type == 'textarea')
